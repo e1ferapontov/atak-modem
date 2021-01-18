@@ -1022,6 +1022,7 @@ public class Modem {
 
                 if (Processor.DCDthrow == 0) {
                     try {
+                        long startTime = System.nanoTime();
                         //Reset the stop flag if it was ON
                         Modem.stopTX = false;
                         //Set flags to TXing
@@ -1031,18 +1032,12 @@ public class Modem {
                         pauseRxModem();
 
                         //Wait for the receiving side to be fully stopped???
-                        //To-Do: review logic here: while (modemState != RXMODEMPAUSED) {
                         Thread.sleep(500);
-                        //						}
 
                         //Open and initialise the sound system
-                        int intSize = 4 * android.media.AudioTrack.getMinBufferSize(8000,
-                                AudioFormat.CHANNEL_OUT_MONO, AudioFormat.ENCODING_PCM_16BIT); //Android check the multiplier value for the buffer size
-                        if (AndFlmsg.toBluetooth) {
-                            txAt = new AudioTrack(AudioManager.STREAM_VOICE_CALL, 8000, AudioFormat.CHANNEL_OUT_MONO, AudioFormat.ENCODING_PCM_16BIT, intSize, AudioTrack.MODE_STREAM);
-                        } else {
-                            txAt = new AudioTrack(AudioManager.STREAM_MUSIC, 8000, AudioFormat.CHANNEL_OUT_MONO, AudioFormat.ENCODING_PCM_16BIT, intSize, AudioTrack.MODE_STREAM);
-                        }
+                        int intSize = 4 * android.media.AudioTrack.getMinBufferSize(8000, AudioFormat.CHANNEL_OUT_MONO, AudioFormat.ENCODING_PCM_16BIT); //Android check the multiplier value for the buffer size
+
+                        txAt = new AudioTrack(AudioManager.STREAM_MUSIC, 8000, AudioFormat.CHANNEL_OUT_MONO, AudioFormat.ENCODING_PCM_16BIT, intSize, AudioTrack.MODE_STREAM);
                         //Launch TX
                         txAt.setStereoVolume(1.0f, 1.0f);
                         txAt.play();
@@ -1056,9 +1051,6 @@ public class Modem {
                         Modem.saveEnv();
                         //Init current modem for Tx
                         Modem.txInit(frequency);
-                        if (txRsidOn) {
-                            Modem.txRSID();
-                        }
                         //Encode character buffer into sound
                         //Changed for Utf-8 variable length codes
                         //Modem.txCProcess(txSendline.getBytes(), txSendline.length());
@@ -1069,16 +1061,7 @@ public class Modem {
                             bytesToSend[0] = 0;//Null character
                         }
                         Modem.txCProcess(bytesToSend, bytesToSend.length);
-                        //Save current mode in case we change it for images Tx
-                        //int currentMode = Processor.RxModem;
-                        //Is there a picture/signature to send after the text?
-                        //Send TX RSID if required
-                        //Check and send post-transmission RSID
-                        if (txRsidOn && config.getPreferenceB("TXPOSTRSID", false)) {
-                            Modem.txRSID();
-                            //debugging only
-                            //Message.addEntryToLog(Message.dateTimeStamp() + "Done post 'txRSID'");
-                        }
+
                         //Stop audio track
                         txAt.stop();
                         //debugging only
@@ -1098,27 +1081,14 @@ public class Modem {
                         //Android debug add a fixed delay to avoid cutting off the tail end of the modulation
                         Thread.sleep(500);
                         txAt.release();
-                        //debugging only
-                        //Message.addEntryToLog(Message.dateTimeStamp() + "Done 'txAt.release'");
 
-                        //if the TX was complete, move message from Outbox to Sent folder
-                        //Detect if it was a simple text sent from the terminal window (no folder and filename)
-                        if (!Modem.stopTX && (txFolder.length() > 0) && (txFileName.length() > 0)) {
-                            Message.copyAnyFile(txFolder, txFileName, Processor.DirSent, false);
-                            //debugging only
-                            //Message.addEntryToLog(Message.dateTimeStamp() + "Done 'copyAnyFile'");
-                            Message.deleteFile(Processor.DirOutbox, txFileName, false);//Don't advise deletion
-                            //debugging only
-                            //Message.addEntryToLog(Message.dateTimeStamp() + "Done 'deleteFile'");
-                            //Ensure we are using the right env variable for this TX thread
-                            Message.addEntryToLog(Message.dateTimeStamp() + " - " + AndFlmsg.myContext.getString(R.string.txt_SentMessagefile)
-                                    + ": " + txFileName);
-                            Thread displayMessagesThread = new Thread(AndFlmsg.displayMessagesRunnable);
-                            displayMessagesThread.start();
-                            //debugging only
-                            //Message.addEntryToLog(Message.dateTimeStamp() + "Done 'displayMessagesThread.start'");
-                        }
+                        long endTime   = System.nanoTime();
+                        long totalTime = (endTime - startTime) / 1000000;
+                        System.out.println("TX duration, ms: " + totalTime);
+                        System.out.println("TX, bytes: " + bytesToSend.length);
+                        System.out.println("TX rate, bit/s: " + (bytesToSend.length * 8) / (totalTime / 1000));
 
+                        AndFlmsg.middleToastText("TX rate, bit/s: " + (bytesToSend.length * 8) / (totalTime / 1000));
                     } catch (Exception e) {
                         loggingclass.writelog("Can't output sound. Is Sound device busy?", null, true);
                     } finally {

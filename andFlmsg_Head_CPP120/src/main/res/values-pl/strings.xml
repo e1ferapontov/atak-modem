@@ -52,7 +52,6 @@
     <string name="pref_AllowManualTuning">Zezwalaj na Ręczne Strojenie</string>
     <string name="pref_AlsoTransmitUpperStartTone">Nadaj górny ton startowy</string>
     <string name="pref_AndFlushRxPipeline">(wyczyść strumień odbioru)</string>
-    <string name="pref_AppTheme">Motyw</string>
     <string name="pref_AudioFrequency">Częst. Audio, 500 do 2500Hz</string>
     <string name="pref_BandwidthHz">Pasmo (Hz)</string>
     <string name="pref_BandwidthRelativeToSignalWidth">(Szerokość Pasma Względem Szerokości Sygnału)</string>
@@ -119,7 +118,6 @@
     <string name="pref_UseCompression">Użyj Kompresji do Wymiany Danych</string>
     <string name="pref_UseCustomListOfModes">Użyj Własnej Listy Modów</string>
     <string name="pref_UseGPSTime">Użyj Czasu GPS</string>
-    <string name="pref_UserInterface">INTERFEJS UŻYTKOWNIKA</string>
     <string name="pref_WhenNewBWOrTonesSelected">Kiedy Wybrane Nowe Pasmo/Ton </string>
 
     <string name="txt_About">Info</string>

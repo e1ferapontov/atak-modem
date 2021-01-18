@@ -52,7 +52,6 @@
     <string name="pref_AllowManualTuning">Ajustage Manuel de Fréquence Permis</string>
     <string name="pref_AlsoTransmitUpperStartTone">Aussi Transmètre la Tonalité de Départ Supérieure</string>
     <string name="pref_AndFlushRxPipeline">(et Nettoye le Pipeline de Réception)</string>
-    <string name="pref_AppTheme">Thème Application</string>
     <string name="pref_AudioFrequency">Fréquence Audio, 500 à 2500Hz</string>
     <string name="pref_BandwidthHz">Largeure de Bande (Hz)</string>
     <string name="pref_BandwidthRelativeToSignalWidth">(Par Rapport à  la Bande du Signal)</string>
@@ -119,7 +118,6 @@
     <string name="pref_UseCompression">Compresser les Données à Transmettre</string>
     <string name="pref_UseCustomListOfModes">Utiliser Liste Personnalisée de Modes</string>
     <string name="pref_UseGPSTime">Utiliser l\'Heure GPS</string>
-    <string name="pref_UserInterface">INTERFACE UTILISATEUR</string>
     <string name="pref_WhenNewBWOrTonesSelected">Au Changement de Largeure de Bande / Tonalités</string>
 
     <string name="txt_About">À Propos</string>

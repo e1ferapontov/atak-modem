@@ -10,42 +10,6 @@
     <style name="andFlmsgStandard" parent="Theme.AppCompat">
     </style>
 
-    
-	<!-- Custom Application theme - in fact Alias for Theme.AppCompat.Light -->
-    <style name="andFlmsgStandardLight" parent="Theme.AppCompat.Light">
-              	<item name="android:windowBackground">@color/complete_white</item>
-				<item name="android:background">@color/complete_white</item>
-      			<item name="android:colorBackground">@color/complete_white</item>
-    </style>
-    
-    
-    <!-- Custom Application theme - in fact Alias for Theme.AppCompat.Dark but with full back windows -->
-    <style name="andFlmsgStandardDark" parent="Theme.AppCompat">
-              	<item name="android:windowBackground">@color/complete_black</item>
-				<item name="android:background">@color/complete_black</item>
-      			<item name="android:colorBackground">@color/complete_black</item>
-    </style>
-    
-
-    <!-- Customized Application theme for small screens (Reduces the height of the action 
-          bar and uses the custom 3 horizontal dots overflow/menu icon. -->
-    <style name="andFlmsgSmallScreen" parent="Theme.AppCompat">
-        <!-- Pointer to Overflow style ***MUST*** go here or it will not work -->
-        <item name="android:actionOverflowButtonStyle" tools:targetApi="21">@style/AppTheme.OverFlow</item>
-        <item name="actionOverflowButtonStyle" >@style/AppTheme.OverFlow</item>
-<!--
--->
-         <!--Action bar style-->
-        <item name="android:actionBarStyle" tools:targetApi="21">@style/AppTheme.ActionBar</item>
-        <item name="actionBarStyle" >@style/AppTheme.ActionBar</item>
-<!-- test
-		<item name="android:background">@color/complete_black</item>
-      	<item name="android:colorBackground">@color/complete_black</item>
--->
-      	<item name="android:windowBackground">@color/complete_black</item>
-    
-    </style>
-
     <style name="AppTheme.OverFlow" parent="Widget.AppCompat.ActionButton.Overflow">
         <item name="android:src">@drawable/overflowicon</item>
     </style>

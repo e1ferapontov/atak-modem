@@ -51,7 +51,6 @@
     <string name="pref_AllowManualTuning">允许手动调整</string>
     <string name="pref_AlsoTransmitUpperStartTone">同时传送上限音</string>
     <string name="pref_AndFlushRxPipeline">(和刷新接收通道)</string>
-    <string name="pref_AppTheme">应用主题</string>
     <string name="pref_AudioFrequency">音频频率500至2500Hz</string>
     <string name="pref_BandwidthHz">带宽(Hz)</string>
     <string name="pref_BandwidthRelativeToSignalWidth">(相对于信号宽度的带宽)</string>
@@ -118,7 +117,6 @@
     <string name="pref_UseCompression">使用压缩进行数据交换</string>
     <string name="pref_UseCustomListOfModes">使用自定义模式列表</string>
     <string name="pref_UseGPSTime">使用GPS时间</string>
-    <string name="pref_UserInterface">用户界面</string>
     <string name="pref_WhenNewBWOrTonesSelected">选择新的BW /音调时</string>
     <string name="txt_About">关于</string>
     <string name="txt_AndFormat">\n及其格式:</string>

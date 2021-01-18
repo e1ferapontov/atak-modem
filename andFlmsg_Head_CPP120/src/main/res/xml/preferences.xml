@@ -6,31 +6,18 @@
         android:key="USEMODELIST"
         android:title="@string/pref_UseCustomListOfModes"></CheckBoxPreference>
 
+    <EditTextPreference
+        android:defaultValue="12"
+        android:inputType="number"
+        android:key="BUTTONTEXTSIZE"
+        android:title="@string/pref_ButtonTextSize">
+    </EditTextPreference>
+
     <PreferenceScreen
         android:dependency="USEMODELIST"
         android:key="modelistPS"
         android:title="@string/pref_ModeList">
         <PreferenceCategory android:key="listofmodestouse"></PreferenceCategory>
-    </PreferenceScreen>
-
-    <PreferenceScreen
-        android:key="userInterfacePS"
-        android:title="@string/pref_UserInterface">
-        <ListPreference
-            android:defaultValue="0"
-            android:entries="@array/themes"
-            android:entryValues="@array/themes_values"
-            android:key="APPTHEME"
-            android:title="@string/pref_AppTheme" />
-        <EditTextPreference
-            android:defaultValue="12"
-            android:inputType="number"
-            android:key="BUTTONTEXTSIZE"
-            android:title="@string/pref_ButtonTextSize">
-        </EditTextPreference>
-
-
-
     </PreferenceScreen>
 
     <PreferenceScreen

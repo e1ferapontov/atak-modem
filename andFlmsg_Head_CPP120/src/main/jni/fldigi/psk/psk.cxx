@@ -450,10 +450,10 @@ End Android mode exclusion
 			PSKviterbi = true;
 			break;
 		case MODE_8PSK1200F: // 1200 baud | 2400 bits/sec @ 2/3 rate FEC
-			symbollen = 13;
+			symbollen = 6;
 			idepth = 512;
 			flushlength = 56;
-			samplerate = 16000;
+			samplerate = 8000;
 			_8psk = true;
 			_puncturing = true;
 			dcdbits = 2048;

@@ -31,23 +31,6 @@ public class myPreferences extends PreferenceActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
-/*No theme for the preferences as the checkboxes do not show on some devices. Use system default instead.	
-    //Set the Activity's Theme
-	int myTheme = config.getPreferenceI("APPTHEME", 0);
-	switch (myTheme) {
-	case 1:
-	    setTheme(R.style.andFlmsgStandardDark);
-	    break;
-	    
-	case 2:
-	    setTheme(R.style.andFlmsgSmallScreen);
-	    break;
-	default:
-	    setTheme(R.style.andFlmsgStandard);
-	    break;
-	}
-*/
         //Start from the fixed section of the preferences
         addPreferencesFromResource(R.xml.preferences);
 

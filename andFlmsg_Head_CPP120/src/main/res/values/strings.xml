@@ -52,7 +52,6 @@
     <string name="pref_AllowManualTuning">Allow Manual Tuning</string>
     <string name="pref_AlsoTransmitUpperStartTone">Also transmit upper start tone</string>
     <string name="pref_AndFlushRxPipeline">(and flush Rx pipeline)</string>
-    <string name="pref_AppTheme">App Theme</string>
     <string name="pref_AudioFrequency">Audio Frequency, 500 to 2500Hz</string>
     <string name="pref_BandwidthHz">Bandwidth (Hz)</string>
     <string name="pref_BandwidthRelativeToSignalWidth">(Bandwidth Relative to Signal Width)</string>
@@ -119,7 +118,6 @@
     <string name="pref_UseCompression">Use Compression for Data Exchange</string>
     <string name="pref_UseCustomListOfModes">Use Custom List Of Modes</string>
     <string name="pref_UseGPSTime">Use GPS Time</string>
-    <string name="pref_UserInterface">USER INTERFACE</string>
     <string name="pref_WhenNewBWOrTonesSelected">When new BW/Tones selected</string>
 
     <string name="txt_About">About</string>

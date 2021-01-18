@@ -94,20 +94,14 @@
 		<Button android:id="@+id/button_modeUP"
 			android:text="@string/bt_NextMode"
 			android:layout_height="fill_parent"
-			android:layout_weight="0.25"
-			android:layout_width="0dp">
-		</Button>
-		<Button android:id="@+id/button_squelchUP"
-			android:text="@string/bt_SqlchUp"
-			android:layout_height="fill_parent"
-			android:layout_weight="0.25"
+			android:layout_weight="0.5"
 			android:layout_width="0dp">
 		</Button>
 		<Button android:id="@+id/button_modemONOFF"
 			android:text="@string/bt_ModemOnOff"
 			android:layout_height="fill_parent"
 			android:layout_width="0dp"
-			android:layout_weight="0.25">
+			android:layout_weight="0.5">
 		</Button>
 	</LinearLayout>
 	<LinearLayout android:id="@+id/FrameLayout4"
@@ -118,20 +112,14 @@
 		<Button android:id="@+id/button_modeDOWN"
 			android:text="@string/bt_PrevMode"
 			android:layout_height="fill_parent"
-			android:layout_weight="0.25"
-			android:layout_width="0dp">
-		</Button>
-		<Button android:id="@+id/button_squelchDOWN"
-			android:text="@string/bt_SqlchDown"
-			android:layout_height="fill_parent"
-			android:layout_weight="0.25"
+			android:layout_weight="0.5"
 			android:layout_width="0dp">
 		</Button>
 		<Button android:id="@+id/button_tune"
 			android:text="@string/bt_Tune"
 			android:layout_height="fill_parent"
 			android:layout_width="0dp"
-			android:layout_weight="0.25">
+			android:layout_weight="0.5">
 		</Button>
 	</LinearLayout>
 </LinearLayout>
