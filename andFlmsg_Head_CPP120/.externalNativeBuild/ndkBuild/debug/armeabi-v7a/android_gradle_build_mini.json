@@ -1,0 +1,23 @@
+{
+  "buildFiles": [
+    "/Users/fm/Downloads/andflmsg_BitBucket/andFlmsg_Head_CPP120/src/main/jni/Android.mk",
+    "/Users/fm/Downloads/andflmsg_BitBucket/andFlmsg_Head_CPP120/src/main/jni/Application.mk"
+  ],
+  "cleanCommands": [
+    "/Users/fm/Library/Android/sdk/ndk/20.0.5594570/ndk-build NDK_PROJECT_PATH\u003dnull APP_BUILD_SCRIPT\u003d/Users/fm/Downloads/andflmsg_BitBucket/andFlmsg_Head_CPP120/src/main/jni/Android.mk NDK_APPLICATION_MK\u003d/Users/fm/Downloads/andflmsg_BitBucket/andFlmsg_Head_CPP120/src/main/jni/Application.mk APP_ABI\u003darmeabi-v7a NDK_ALL_ABIS\u003darmeabi-v7a NDK_DEBUG\u003d1 APP_PLATFORM\u003dandroid-16 NDK_OUT\u003d/Users/fm/Downloads/andflmsg_BitBucket/andFlmsg_Head_CPP120/build/intermediates/ndkBuild/debug/obj NDK_LIBS_OUT\u003d/Users/fm/Downloads/andflmsg_BitBucket/andFlmsg_Head_CPP120/build/intermediates/ndkBuild/debug/lib APP_CFLAGS+\u003d-DHAVE_STRCASESTR clean"
+  ],
+  "libraries": {
+    "AndFlmsg_Flmsg_Interface-debug-armeabi-v7a": {
+      "artifactName": "AndFlmsg_Flmsg_Interface",
+      "buildCommand": "/Users/fm/Library/Android/sdk/ndk/20.0.5594570/ndk-build NDK_PROJECT_PATH\u003dnull APP_BUILD_SCRIPT\u003d/Users/fm/Downloads/andflmsg_BitBucket/andFlmsg_Head_CPP120/src/main/jni/Android.mk NDK_APPLICATION_MK\u003d/Users/fm/Downloads/andflmsg_BitBucket/andFlmsg_Head_CPP120/src/main/jni/Application.mk APP_ABI\u003darmeabi-v7a NDK_ALL_ABIS\u003darmeabi-v7a NDK_DEBUG\u003d1 APP_PLATFORM\u003dandroid-16 NDK_OUT\u003d/Users/fm/Downloads/andflmsg_BitBucket/andFlmsg_Head_CPP120/build/intermediates/ndkBuild/debug/obj NDK_LIBS_OUT\u003d/Users/fm/Downloads/andflmsg_BitBucket/andFlmsg_Head_CPP120/build/intermediates/ndkBuild/debug/lib APP_CFLAGS+\u003d-DHAVE_STRCASESTR /Users/fm/Downloads/andflmsg_BitBucket/andFlmsg_Head_CPP120/build/intermediates/ndkBuild/debug/obj/local/armeabi-v7a/libAndFlmsg_Flmsg_Interface.so",
+      "abi": "armeabi-v7a",
+      "output": "/Users/fm/Downloads/andflmsg_BitBucket/andFlmsg_Head_CPP120/build/intermediates/ndkBuild/debug/obj/local/armeabi-v7a/libAndFlmsg_Flmsg_Interface.so"
+    },
+    "AndFlmsg_Modem_Interface-debug-armeabi-v7a": {
+      "artifactName": "AndFlmsg_Modem_Interface",
+      "buildCommand": "/Users/fm/Library/Android/sdk/ndk/20.0.5594570/ndk-build NDK_PROJECT_PATH\u003dnull APP_BUILD_SCRIPT\u003d/Users/fm/Downloads/andflmsg_BitBucket/andFlmsg_Head_CPP120/src/main/jni/Android.mk NDK_APPLICATION_MK\u003d/Users/fm/Downloads/andflmsg_BitBucket/andFlmsg_Head_CPP120/src/main/jni/Application.mk APP_ABI\u003darmeabi-v7a NDK_ALL_ABIS\u003darmeabi-v7a NDK_DEBUG\u003d1 APP_PLATFORM\u003dandroid-16 NDK_OUT\u003d/Users/fm/Downloads/andflmsg_BitBucket/andFlmsg_Head_CPP120/build/intermediates/ndkBuild/debug/obj NDK_LIBS_OUT\u003d/Users/fm/Downloads/andflmsg_BitBucket/andFlmsg_Head_CPP120/build/intermediates/ndkBuild/debug/lib APP_CFLAGS+\u003d-DHAVE_STRCASESTR /Users/fm/Downloads/andflmsg_BitBucket/andFlmsg_Head_CPP120/build/intermediates/ndkBuild/debug/obj/local/armeabi-v7a/libAndFlmsg_Modem_Interface.so",
+      "abi": "armeabi-v7a",
+      "output": "/Users/fm/Downloads/andflmsg_BitBucket/andFlmsg_Head_CPP120/build/intermediates/ndkBuild/debug/obj/local/armeabi-v7a/libAndFlmsg_Modem_Interface.so"
+    }
+  }
+}

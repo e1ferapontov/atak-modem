@@ -1,0 +1,43 @@
+apply plugin: 'com.android.application'
+
+android {
+    compileSdkVersion 27
+
+    defaultConfig {
+        applicationId "com.AndFlmsg"
+        minSdkVersion 14
+        targetSdkVersion 27
+        externalNativeBuild {
+            ndkBuild {
+                abiFilters 'armeabi-v7a', 'x86'
+                cFlags "-DHAVE_STRCASESTR"
+            }
+        }
+   }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.txt'
+        }
+    }
+
+    aaptOptions {
+        cruncherEnabled = false
+    }
+
+    externalNativeBuild {
+        ndkBuild {
+            path 'src/main/jni/Android.mk'
+        }
+    }
+
+    lintOptions {
+        disable 'MissingTranslation'
+    }
+}
+
+dependencies {
+    implementation 'com.android.support:support-v4:27.1.0'
+    implementation 'com.android.support:appcompat-v7:27.1.0'
+}

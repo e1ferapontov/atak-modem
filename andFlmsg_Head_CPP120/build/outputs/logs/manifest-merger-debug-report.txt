@@ -1,0 +1,192 @@
+-- Merging decision tree log ---
+provider#com.AndFlmsg.myFileProvider
+INJECTED from /Users/fm/Downloads/andflmsg_BitBucket/andFlmsg_Head_CPP120/src/main/AndroidManifest.xml:49:9-57:20
+	android:grantUriPermissions
+		ADDED from /Users/fm/Downloads/andflmsg_BitBucket/andFlmsg_Head_CPP120/src/main/AndroidManifest.xml:53:13-47
+	android:authorities
+		INJECTED from /Users/fm/Downloads/andflmsg_BitBucket/andFlmsg_Head_CPP120/src/main/AndroidManifest.xml
+		ADDED from /Users/fm/Downloads/andflmsg_BitBucket/andFlmsg_Head_CPP120/src/main/AndroidManifest.xml:51:13-60
+	android:exported
+		ADDED from /Users/fm/Downloads/andflmsg_BitBucket/andFlmsg_Head_CPP120/src/main/AndroidManifest.xml:52:13-37
+	android:name
+		ADDED from /Users/fm/Downloads/andflmsg_BitBucket/andFlmsg_Head_CPP120/src/main/AndroidManifest.xml:50:13-43
+manifest
+ADDED from /Users/fm/Downloads/andflmsg_BitBucket/andFlmsg_Head_CPP120/src/main/AndroidManifest.xml:2:1-61:12
+INJECTED from /Users/fm/Downloads/andflmsg_BitBucket/andFlmsg_Head_CPP120/src/main/AndroidManifest.xml:2:1-61:12
+INJECTED from /Users/fm/Downloads/andflmsg_BitBucket/andFlmsg_Head_CPP120/src/main/AndroidManifest.xml:2:1-61:12
+INJECTED from /Users/fm/Downloads/andflmsg_BitBucket/andFlmsg_Head_CPP120/src/main/AndroidManifest.xml:2:1-61:12
+MERGED from [:aFileDialogoriginal] /Users/fm/Downloads/andflmsg_BitBucket/aFileDialogoriginal/build/intermediates/library_manifest/debug/AndroidManifest.xml:2:1-17:12
+MERGED from [com.android.support:support-v4:27.1.0] /Users/fm/.gradle/caches/transforms-2/files-2.1/f989ca63e21e92058727f6b89c7f563b/AndroidManifest.xml:17:1-22:12
+MERGED from [com.android.support:appcompat-v7:27.1.0] /Users/fm/.gradle/caches/transforms-2/files-2.1/885ba127412aa2e0c55cf3520f9185b7/AndroidManifest.xml:17:1-22:12
+MERGED from [com.android.support:support-media-compat:27.1.0] /Users/fm/.gradle/caches/transforms-2/files-2.1/b6c7d0f82bcb382da18f29fc699db5ad/AndroidManifest.xml:17:1-22:12
+MERGED from [com.android.support:support-fragment:27.1.0] /Users/fm/.gradle/caches/transforms-2/files-2.1/c62f2e59b61fc4ce8b71df8a1fcff8bb/AndroidManifest.xml:17:1-22:12
+MERGED from [com.android.support:animated-vector-drawable:27.1.0] /Users/fm/.gradle/caches/transforms-2/files-2.1/5b66ec99eb318e7cb1cec4bb5cce4b51/AndroidManifest.xml:17:1-22:12
+MERGED from [com.android.support:support-core-ui:27.1.0] /Users/fm/.gradle/caches/transforms-2/files-2.1/24c6cc4326986d44a4757c7aaa8b5aaf/AndroidManifest.xml:17:1-22:12
+MERGED from [com.android.support:support-core-utils:27.1.0] /Users/fm/.gradle/caches/transforms-2/files-2.1/ed8c5e65733146d5d3c6340615a6c046/AndroidManifest.xml:17:1-22:12
+MERGED from [com.android.support:support-vector-drawable:27.1.0] /Users/fm/.gradle/caches/transforms-2/files-2.1/243edec4b30a6923c92a90b1d96a5597/AndroidManifest.xml:17:1-22:12
+MERGED from [com.android.support:support-compat:27.1.0] /Users/fm/.gradle/caches/transforms-2/files-2.1/6c72876c14d8ef89afecbf06751298b4/AndroidManifest.xml:17:1-22:12
+MERGED from [android.arch.lifecycle:runtime:1.1.0] /Users/fm/.gradle/caches/transforms-2/files-2.1/36a87208a328bed7f4d5b1ce3fc27e8f/AndroidManifest.xml:17:1-22:12
+MERGED from [android.arch.lifecycle:livedata-core:1.1.0] /Users/fm/.gradle/caches/transforms-2/files-2.1/01b14744d0c987e5b1139c031116e2aa/AndroidManifest.xml:17:1-22:12
+MERGED from [android.arch.lifecycle:viewmodel:1.1.0] /Users/fm/.gradle/caches/transforms-2/files-2.1/6bde7e6d9c65dac498ef10997f13375b/AndroidManifest.xml:17:1-22:12
+MERGED from [android.arch.core:runtime:1.1.0] /Users/fm/.gradle/caches/transforms-2/files-2.1/8264521e84f7927b8e9c4136d976e203/AndroidManifest.xml:17:1-22:12
+INJECTED from /Users/fm/Downloads/andflmsg_BitBucket/andFlmsg_Head_CPP120/src/main/AndroidManifest.xml:2:1-61:12
+INJECTED from /Users/fm/Downloads/andflmsg_BitBucket/andFlmsg_Head_CPP120/src/main/AndroidManifest.xml:2:1-61:12
+INJECTED from /Users/fm/Downloads/andflmsg_BitBucket/andFlmsg_Head_CPP120/src/main/AndroidManifest.xml:2:1-61:12
+	package
+		ADDED from /Users/fm/Downloads/andflmsg_BitBucket/andFlmsg_Head_CPP120/src/main/AndroidManifest.xml:2:11-33
+		INJECTED from /Users/fm/Downloads/andflmsg_BitBucket/andFlmsg_Head_CPP120/src/main/AndroidManifest.xml
+		INJECTED from /Users/fm/Downloads/andflmsg_BitBucket/andFlmsg_Head_CPP120/src/main/AndroidManifest.xml
+	android:versionName
+		ADDED from /Users/fm/Downloads/andflmsg_BitBucket/andFlmsg_Head_CPP120/src/main/AndroidManifest.xml:5:5-32
+		INJECTED from /Users/fm/Downloads/andflmsg_BitBucket/andFlmsg_Head_CPP120/src/main/AndroidManifest.xml
+		INJECTED from /Users/fm/Downloads/andflmsg_BitBucket/andFlmsg_Head_CPP120/src/main/AndroidManifest.xml
+	xmlns:tools
+		ADDED from /Users/fm/Downloads/andflmsg_BitBucket/andFlmsg_Head_CPP120/src/main/AndroidManifest.xml:3:5-51
+	xmlns:android
+		ADDED from /Users/fm/Downloads/andflmsg_BitBucket/andFlmsg_Head_CPP120/src/main/AndroidManifest.xml:5:33-91
+	android:versionCode
+		ADDED from /Users/fm/Downloads/andflmsg_BitBucket/andFlmsg_Head_CPP120/src/main/AndroidManifest.xml:4:5-28
+		INJECTED from /Users/fm/Downloads/andflmsg_BitBucket/andFlmsg_Head_CPP120/src/main/AndroidManifest.xml
+		INJECTED from /Users/fm/Downloads/andflmsg_BitBucket/andFlmsg_Head_CPP120/src/main/AndroidManifest.xml
+uses-permission#android.permission.ACCESS_FINE_LOCATION
+ADDED from /Users/fm/Downloads/andflmsg_BitBucket/andFlmsg_Head_CPP120/src/main/AndroidManifest.xml:6:5-95
+	android:name
+		ADDED from /Users/fm/Downloads/andflmsg_BitBucket/andFlmsg_Head_CPP120/src/main/AndroidManifest.xml:6:22-76
+uses-permission#android.permission.BLUETOOTH
+ADDED from /Users/fm/Downloads/andflmsg_BitBucket/andFlmsg_Head_CPP120/src/main/AndroidManifest.xml:7:5-84
+	android:name
+		ADDED from /Users/fm/Downloads/andflmsg_BitBucket/andFlmsg_Head_CPP120/src/main/AndroidManifest.xml:7:22-65
+uses-permission#android.permission.BLUETOOTH_ADMIN
+ADDED from /Users/fm/Downloads/andflmsg_BitBucket/andFlmsg_Head_CPP120/src/main/AndroidManifest.xml:8:5-90
+	android:name
+		ADDED from /Users/fm/Downloads/andflmsg_BitBucket/andFlmsg_Head_CPP120/src/main/AndroidManifest.xml:8:22-71
+uses-permission#android.permission.WRITE_EXTERNAL_STORAGE
+ADDED from /Users/fm/Downloads/andflmsg_BitBucket/andFlmsg_Head_CPP120/src/main/AndroidManifest.xml:9:5-97
+	android:name
+		ADDED from /Users/fm/Downloads/andflmsg_BitBucket/andFlmsg_Head_CPP120/src/main/AndroidManifest.xml:9:22-78
+uses-permission#android.permission.RECORD_AUDIO
+ADDED from /Users/fm/Downloads/andflmsg_BitBucket/andFlmsg_Head_CPP120/src/main/AndroidManifest.xml:10:5-87
+	android:name
+		ADDED from /Users/fm/Downloads/andflmsg_BitBucket/andFlmsg_Head_CPP120/src/main/AndroidManifest.xml:10:22-68
+uses-permission#android.permission.MODIFY_AUDIO_SETTINGS
+ADDED from /Users/fm/Downloads/andflmsg_BitBucket/andFlmsg_Head_CPP120/src/main/AndroidManifest.xml:11:5-96
+	android:name
+		ADDED from /Users/fm/Downloads/andflmsg_BitBucket/andFlmsg_Head_CPP120/src/main/AndroidManifest.xml:11:22-77
+uses-permission#android.permission.BROADCAST_STICKY
+ADDED from /Users/fm/Downloads/andflmsg_BitBucket/andFlmsg_Head_CPP120/src/main/AndroidManifest.xml:12:5-91
+	android:name
+		ADDED from /Users/fm/Downloads/andflmsg_BitBucket/andFlmsg_Head_CPP120/src/main/AndroidManifest.xml:12:22-72
+uses-permission#android.permission.INTERNET
+ADDED from /Users/fm/Downloads/andflmsg_BitBucket/andFlmsg_Head_CPP120/src/main/AndroidManifest.xml:13:5-83
+	android:name
+		ADDED from /Users/fm/Downloads/andflmsg_BitBucket/andFlmsg_Head_CPP120/src/main/AndroidManifest.xml:13:22-64
+uses-permission#android.permission.READ_PHONE_STATE
+ADDED from /Users/fm/Downloads/andflmsg_BitBucket/andFlmsg_Head_CPP120/src/main/AndroidManifest.xml:14:5-91
+	android:name
+		ADDED from /Users/fm/Downloads/andflmsg_BitBucket/andFlmsg_Head_CPP120/src/main/AndroidManifest.xml:14:22-72
+uses-permission#android.permission.FOREGROUND_SERVICE
+ADDED from /Users/fm/Downloads/andflmsg_BitBucket/andFlmsg_Head_CPP120/src/main/AndroidManifest.xml:15:5-77
+	android:name
+		ADDED from /Users/fm/Downloads/andflmsg_BitBucket/andFlmsg_Head_CPP120/src/main/AndroidManifest.xml:15:22-74
+application
+ADDED from /Users/fm/Downloads/andflmsg_BitBucket/andFlmsg_Head_CPP120/src/main/AndroidManifest.xml:16:5-59:19
+MERGED from [:aFileDialogoriginal] /Users/fm/Downloads/andflmsg_BitBucket/aFileDialogoriginal/build/intermediates/library_manifest/debug/AndroidManifest.xml:11:5-15:19
+MERGED from [:aFileDialogoriginal] /Users/fm/Downloads/andflmsg_BitBucket/aFileDialogoriginal/build/intermediates/library_manifest/debug/AndroidManifest.xml:11:5-15:19
+	android:label
+		ADDED from /Users/fm/Downloads/andflmsg_BitBucket/andFlmsg_Head_CPP120/src/main/AndroidManifest.xml:20:9-45
+		REJECTED from [:aFileDialogoriginal] /Users/fm/Downloads/andflmsg_BitBucket/aFileDialogoriginal/build/intermediates/library_manifest/debug/AndroidManifest.xml:13:9-50
+	android:icon
+		ADDED from /Users/fm/Downloads/andflmsg_BitBucket/andFlmsg_Head_CPP120/src/main/AndroidManifest.xml:19:9-38
+		REJECTED from [:aFileDialogoriginal] /Users/fm/Downloads/andflmsg_BitBucket/aFileDialogoriginal/build/intermediates/library_manifest/debug/AndroidManifest.xml:12:9-45
+	tools:replace
+		ADDED from /Users/fm/Downloads/andflmsg_BitBucket/andFlmsg_Head_CPP120/src/main/AndroidManifest.xml:17:9-64
+	android:name
+		ADDED from /Users/fm/Downloads/andflmsg_BitBucket/andFlmsg_Head_CPP120/src/main/AndroidManifest.xml:18:9-37
+activity#com.AndFlmsg.AndFlmsg
+ADDED from /Users/fm/Downloads/andflmsg_BitBucket/andFlmsg_Head_CPP120/src/main/AndroidManifest.xml:21:9-31:20
+	android:label
+		ADDED from /Users/fm/Downloads/andflmsg_BitBucket/andFlmsg_Head_CPP120/src/main/AndroidManifest.xml:24:13-49
+	android:windowSoftInputMode
+		ADDED from /Users/fm/Downloads/andflmsg_BitBucket/andFlmsg_Head_CPP120/src/main/AndroidManifest.xml:26:13-54
+	android:configChanges
+		ADDED from /Users/fm/Downloads/andflmsg_BitBucket/andFlmsg_Head_CPP120/src/main/AndroidManifest.xml:23:13-87
+	android:theme
+		ADDED from /Users/fm/Downloads/andflmsg_BitBucket/andFlmsg_Head_CPP120/src/main/AndroidManifest.xml:25:13-51
+	android:name
+		ADDED from /Users/fm/Downloads/andflmsg_BitBucket/andFlmsg_Head_CPP120/src/main/AndroidManifest.xml:22:13-37
+intent-filter#action:name:android.intent.action.MAIN+category:name:android.intent.category.LAUNCHER
+ADDED from /Users/fm/Downloads/andflmsg_BitBucket/andFlmsg_Head_CPP120/src/main/AndroidManifest.xml:27:13-30:29
+action#android.intent.action.MAIN
+ADDED from /Users/fm/Downloads/andflmsg_BitBucket/andFlmsg_Head_CPP120/src/main/AndroidManifest.xml:28:17-69
+	android:name
+		ADDED from /Users/fm/Downloads/andflmsg_BitBucket/andFlmsg_Head_CPP120/src/main/AndroidManifest.xml:28:25-66
+category#android.intent.category.LAUNCHER
+ADDED from /Users/fm/Downloads/andflmsg_BitBucket/andFlmsg_Head_CPP120/src/main/AndroidManifest.xml:29:17-77
+	android:name
+		ADDED from /Users/fm/Downloads/andflmsg_BitBucket/andFlmsg_Head_CPP120/src/main/AndroidManifest.xml:29:27-74
+activity#com.AndFlmsg.myPreferences
+ADDED from /Users/fm/Downloads/andflmsg_BitBucket/andFlmsg_Head_CPP120/src/main/AndroidManifest.xml:33:9-35:20
+	android:name
+		ADDED from /Users/fm/Downloads/andflmsg_BitBucket/andFlmsg_Head_CPP120/src/main/AndroidManifest.xml:34:13-41
+service#com.AndFlmsg.Processor
+ADDED from /Users/fm/Downloads/andflmsg_BitBucket/andFlmsg_Head_CPP120/src/main/AndroidManifest.xml:37:9-39:19
+	android:name
+		ADDED from /Users/fm/Downloads/andflmsg_BitBucket/andFlmsg_Head_CPP120/src/main/AndroidManifest.xml:38:13-38
+activity#ar.com.daidalos.afiledialog.FileChooserActivity
+ADDED from /Users/fm/Downloads/andflmsg_BitBucket/andFlmsg_Head_CPP120/src/main/AndroidManifest.xml:41:9-43:20
+MERGED from [:aFileDialogoriginal] /Users/fm/Downloads/andflmsg_BitBucket/aFileDialogoriginal/build/intermediates/library_manifest/debug/AndroidManifest.xml:14:9-84
+MERGED from [:aFileDialogoriginal] /Users/fm/Downloads/andflmsg_BitBucket/aFileDialogoriginal/build/intermediates/library_manifest/debug/AndroidManifest.xml:14:9-84
+	android:name
+		ADDED from /Users/fm/Downloads/andflmsg_BitBucket/andFlmsg_Head_CPP120/src/main/AndroidManifest.xml:42:13-75
+activity#com.AndFlmsg.imagePicker
+ADDED from /Users/fm/Downloads/andflmsg_BitBucket/andFlmsg_Head_CPP120/src/main/AndroidManifest.xml:45:9-47:20
+	android:name
+		ADDED from /Users/fm/Downloads/andflmsg_BitBucket/andFlmsg_Head_CPP120/src/main/AndroidManifest.xml:46:13-40
+uses-sdk
+INJECTED from /Users/fm/Downloads/andflmsg_BitBucket/andFlmsg_Head_CPP120/src/main/AndroidManifest.xml reason: use-sdk injection requested
+INJECTED from /Users/fm/Downloads/andflmsg_BitBucket/andFlmsg_Head_CPP120/src/main/AndroidManifest.xml
+INJECTED from /Users/fm/Downloads/andflmsg_BitBucket/andFlmsg_Head_CPP120/src/main/AndroidManifest.xml
+MERGED from [:aFileDialogoriginal] /Users/fm/Downloads/andflmsg_BitBucket/aFileDialogoriginal/build/intermediates/library_manifest/debug/AndroidManifest.xml:7:5-9:41
+MERGED from [:aFileDialogoriginal] /Users/fm/Downloads/andflmsg_BitBucket/aFileDialogoriginal/build/intermediates/library_manifest/debug/AndroidManifest.xml:7:5-9:41
+MERGED from [com.android.support:support-v4:27.1.0] /Users/fm/.gradle/caches/transforms-2/files-2.1/f989ca63e21e92058727f6b89c7f563b/AndroidManifest.xml:20:5-44
+MERGED from [com.android.support:support-v4:27.1.0] /Users/fm/.gradle/caches/transforms-2/files-2.1/f989ca63e21e92058727f6b89c7f563b/AndroidManifest.xml:20:5-44
+MERGED from [com.android.support:appcompat-v7:27.1.0] /Users/fm/.gradle/caches/transforms-2/files-2.1/885ba127412aa2e0c55cf3520f9185b7/AndroidManifest.xml:20:5-44
+MERGED from [com.android.support:appcompat-v7:27.1.0] /Users/fm/.gradle/caches/transforms-2/files-2.1/885ba127412aa2e0c55cf3520f9185b7/AndroidManifest.xml:20:5-44
+MERGED from [com.android.support:support-media-compat:27.1.0] /Users/fm/.gradle/caches/transforms-2/files-2.1/b6c7d0f82bcb382da18f29fc699db5ad/AndroidManifest.xml:20:5-44
+MERGED from [com.android.support:support-media-compat:27.1.0] /Users/fm/.gradle/caches/transforms-2/files-2.1/b6c7d0f82bcb382da18f29fc699db5ad/AndroidManifest.xml:20:5-44
+MERGED from [com.android.support:support-fragment:27.1.0] /Users/fm/.gradle/caches/transforms-2/files-2.1/c62f2e59b61fc4ce8b71df8a1fcff8bb/AndroidManifest.xml:20:5-44
+MERGED from [com.android.support:support-fragment:27.1.0] /Users/fm/.gradle/caches/transforms-2/files-2.1/c62f2e59b61fc4ce8b71df8a1fcff8bb/AndroidManifest.xml:20:5-44
+MERGED from [com.android.support:animated-vector-drawable:27.1.0] /Users/fm/.gradle/caches/transforms-2/files-2.1/5b66ec99eb318e7cb1cec4bb5cce4b51/AndroidManifest.xml:20:5-44
+MERGED from [com.android.support:animated-vector-drawable:27.1.0] /Users/fm/.gradle/caches/transforms-2/files-2.1/5b66ec99eb318e7cb1cec4bb5cce4b51/AndroidManifest.xml:20:5-44
+MERGED from [com.android.support:support-core-ui:27.1.0] /Users/fm/.gradle/caches/transforms-2/files-2.1/24c6cc4326986d44a4757c7aaa8b5aaf/AndroidManifest.xml:20:5-44
+MERGED from [com.android.support:support-core-ui:27.1.0] /Users/fm/.gradle/caches/transforms-2/files-2.1/24c6cc4326986d44a4757c7aaa8b5aaf/AndroidManifest.xml:20:5-44
+MERGED from [com.android.support:support-core-utils:27.1.0] /Users/fm/.gradle/caches/transforms-2/files-2.1/ed8c5e65733146d5d3c6340615a6c046/AndroidManifest.xml:20:5-44
+MERGED from [com.android.support:support-core-utils:27.1.0] /Users/fm/.gradle/caches/transforms-2/files-2.1/ed8c5e65733146d5d3c6340615a6c046/AndroidManifest.xml:20:5-44
+MERGED from [com.android.support:support-vector-drawable:27.1.0] /Users/fm/.gradle/caches/transforms-2/files-2.1/243edec4b30a6923c92a90b1d96a5597/AndroidManifest.xml:20:5-44
+MERGED from [com.android.support:support-vector-drawable:27.1.0] /Users/fm/.gradle/caches/transforms-2/files-2.1/243edec4b30a6923c92a90b1d96a5597/AndroidManifest.xml:20:5-44
+MERGED from [com.android.support:support-compat:27.1.0] /Users/fm/.gradle/caches/transforms-2/files-2.1/6c72876c14d8ef89afecbf06751298b4/AndroidManifest.xml:20:5-44
+MERGED from [com.android.support:support-compat:27.1.0] /Users/fm/.gradle/caches/transforms-2/files-2.1/6c72876c14d8ef89afecbf06751298b4/AndroidManifest.xml:20:5-44
+MERGED from [android.arch.lifecycle:runtime:1.1.0] /Users/fm/.gradle/caches/transforms-2/files-2.1/36a87208a328bed7f4d5b1ce3fc27e8f/AndroidManifest.xml:20:5-44
+MERGED from [android.arch.lifecycle:runtime:1.1.0] /Users/fm/.gradle/caches/transforms-2/files-2.1/36a87208a328bed7f4d5b1ce3fc27e8f/AndroidManifest.xml:20:5-44
+MERGED from [android.arch.lifecycle:livedata-core:1.1.0] /Users/fm/.gradle/caches/transforms-2/files-2.1/01b14744d0c987e5b1139c031116e2aa/AndroidManifest.xml:20:5-44
+MERGED from [android.arch.lifecycle:livedata-core:1.1.0] /Users/fm/.gradle/caches/transforms-2/files-2.1/01b14744d0c987e5b1139c031116e2aa/AndroidManifest.xml:20:5-44
+MERGED from [android.arch.lifecycle:viewmodel:1.1.0] /Users/fm/.gradle/caches/transforms-2/files-2.1/6bde7e6d9c65dac498ef10997f13375b/AndroidManifest.xml:20:5-44
+MERGED from [android.arch.lifecycle:viewmodel:1.1.0] /Users/fm/.gradle/caches/transforms-2/files-2.1/6bde7e6d9c65dac498ef10997f13375b/AndroidManifest.xml:20:5-44
+MERGED from [android.arch.core:runtime:1.1.0] /Users/fm/.gradle/caches/transforms-2/files-2.1/8264521e84f7927b8e9c4136d976e203/AndroidManifest.xml:20:5-44
+MERGED from [android.arch.core:runtime:1.1.0] /Users/fm/.gradle/caches/transforms-2/files-2.1/8264521e84f7927b8e9c4136d976e203/AndroidManifest.xml:20:5-44
+INJECTED from /Users/fm/Downloads/andflmsg_BitBucket/andFlmsg_Head_CPP120/src/main/AndroidManifest.xml
+INJECTED from /Users/fm/Downloads/andflmsg_BitBucket/andFlmsg_Head_CPP120/src/main/AndroidManifest.xml
+	android:targetSdkVersion
+		INJECTED from /Users/fm/Downloads/andflmsg_BitBucket/andFlmsg_Head_CPP120/src/main/AndroidManifest.xml
+		ADDED from /Users/fm/Downloads/andflmsg_BitBucket/andFlmsg_Head_CPP120/src/main/AndroidManifest.xml
+		INJECTED from /Users/fm/Downloads/andflmsg_BitBucket/andFlmsg_Head_CPP120/src/main/AndroidManifest.xml
+	android:minSdkVersion
+		INJECTED from /Users/fm/Downloads/andflmsg_BitBucket/andFlmsg_Head_CPP120/src/main/AndroidManifest.xml
+		ADDED from /Users/fm/Downloads/andflmsg_BitBucket/andFlmsg_Head_CPP120/src/main/AndroidManifest.xml
+		INJECTED from /Users/fm/Downloads/andflmsg_BitBucket/andFlmsg_Head_CPP120/src/main/AndroidManifest.xml
+meta-data#android.support.FILE_PROVIDER_PATHS
+ADDED from /Users/fm/Downloads/andflmsg_BitBucket/andFlmsg_Head_CPP120/src/main/AndroidManifest.xml:54:13-56:57
+	android:resource
+		ADDED from /Users/fm/Downloads/andflmsg_BitBucket/andFlmsg_Head_CPP120/src/main/AndroidManifest.xml:56:17-55
+	android:name
+		ADDED from /Users/fm/Downloads/andflmsg_BitBucket/andFlmsg_Head_CPP120/src/main/AndroidManifest.xml:55:17-67

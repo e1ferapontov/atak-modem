@@ -1,0 +1,23 @@
+{
+  "buildFiles": [
+    "/Users/fm/Projects/atak-modem/andFlmsg_Head_CPP120/src/main/jni/Android.mk",
+    "/Users/fm/Projects/atak-modem/andFlmsg_Head_CPP120/src/main/jni/Application.mk"
+  ],
+  "cleanCommands": [
+    "/Users/fm/Library/Android/sdk/ndk/20.0.5594570/ndk-build NDK_PROJECT_PATH\u003dnull APP_BUILD_SCRIPT\u003d/Users/fm/Projects/atak-modem/andFlmsg_Head_CPP120/src/main/jni/Android.mk NDK_APPLICATION_MK\u003d/Users/fm/Projects/atak-modem/andFlmsg_Head_CPP120/src/main/jni/Application.mk APP_ABI\u003dx86 NDK_ALL_ABIS\u003dx86 NDK_DEBUG\u003d1 APP_PLATFORM\u003dandroid-16 NDK_OUT\u003d/Users/fm/Projects/atak-modem/andFlmsg_Head_CPP120/build/intermediates/ndkBuild/debug/obj NDK_LIBS_OUT\u003d/Users/fm/Projects/atak-modem/andFlmsg_Head_CPP120/build/intermediates/ndkBuild/debug/lib APP_CFLAGS+\u003d-DHAVE_STRCASESTR clean"
+  ],
+  "libraries": {
+    "AndFlmsg_Flmsg_Interface-debug-x86": {
+      "artifactName": "AndFlmsg_Flmsg_Interface",
+      "buildCommand": "/Users/fm/Library/Android/sdk/ndk/20.0.5594570/ndk-build NDK_PROJECT_PATH\u003dnull APP_BUILD_SCRIPT\u003d/Users/fm/Projects/atak-modem/andFlmsg_Head_CPP120/src/main/jni/Android.mk NDK_APPLICATION_MK\u003d/Users/fm/Projects/atak-modem/andFlmsg_Head_CPP120/src/main/jni/Application.mk APP_ABI\u003dx86 NDK_ALL_ABIS\u003dx86 NDK_DEBUG\u003d1 APP_PLATFORM\u003dandroid-16 NDK_OUT\u003d/Users/fm/Projects/atak-modem/andFlmsg_Head_CPP120/build/intermediates/ndkBuild/debug/obj NDK_LIBS_OUT\u003d/Users/fm/Projects/atak-modem/andFlmsg_Head_CPP120/build/intermediates/ndkBuild/debug/lib APP_CFLAGS+\u003d-DHAVE_STRCASESTR /Users/fm/Projects/atak-modem/andFlmsg_Head_CPP120/build/intermediates/ndkBuild/debug/obj/local/x86/libAndFlmsg_Flmsg_Interface.so",
+      "abi": "x86",
+      "output": "/Users/fm/Projects/atak-modem/andFlmsg_Head_CPP120/build/intermediates/ndkBuild/debug/obj/local/x86/libAndFlmsg_Flmsg_Interface.so"
+    },
+    "AndFlmsg_Modem_Interface-debug-x86": {
+      "artifactName": "AndFlmsg_Modem_Interface",
+      "buildCommand": "/Users/fm/Library/Android/sdk/ndk/20.0.5594570/ndk-build NDK_PROJECT_PATH\u003dnull APP_BUILD_SCRIPT\u003d/Users/fm/Projects/atak-modem/andFlmsg_Head_CPP120/src/main/jni/Android.mk NDK_APPLICATION_MK\u003d/Users/fm/Projects/atak-modem/andFlmsg_Head_CPP120/src/main/jni/Application.mk APP_ABI\u003dx86 NDK_ALL_ABIS\u003dx86 NDK_DEBUG\u003d1 APP_PLATFORM\u003dandroid-16 NDK_OUT\u003d/Users/fm/Projects/atak-modem/andFlmsg_Head_CPP120/build/intermediates/ndkBuild/debug/obj NDK_LIBS_OUT\u003d/Users/fm/Projects/atak-modem/andFlmsg_Head_CPP120/build/intermediates/ndkBuild/debug/lib APP_CFLAGS+\u003d-DHAVE_STRCASESTR /Users/fm/Projects/atak-modem/andFlmsg_Head_CPP120/build/intermediates/ndkBuild/debug/obj/local/x86/libAndFlmsg_Modem_Interface.so",
+      "abi": "x86",
+      "output": "/Users/fm/Projects/atak-modem/andFlmsg_Head_CPP120/build/intermediates/ndkBuild/debug/obj/local/x86/libAndFlmsg_Modem_Interface.so"
+    }
+  }
+}
