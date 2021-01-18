@@ -1,5 +1,6 @@
 LOCAL_PATH := $(call my-dir)
 include $(CLEAR_VARS)
+LOCAL_LDLIBS  := -llog
 LOCAL_MODULE    := AndFlmsg_Modem_Interface
 LOCAL_CPP_EXTENSION := .cxx .cpp .cc
 LOCAL_SRC_FILES := AndFlmsg_Fldigi_Interface.cpp fldigi/modem.cxx \
