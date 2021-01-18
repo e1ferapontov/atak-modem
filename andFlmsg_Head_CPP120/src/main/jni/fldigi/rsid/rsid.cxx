@@ -93,7 +93,7 @@ cRsId::cRsId()
 {
 	//Android Added access to progdefaults(preferences) in the Java side
 	progdefaults.RsID_label_type = getPreferenceI("RSID_ERRORS", 2);
-	progdefaults.rsidWideSearch  = getPreferenceB("RSIDWIDESEARCH", true);
+	progdefaults.rsidWideSearch  = getPreferenceB("RSIDWIDESEARCH", false);
 
 	int error;
 /* Not yet in C++

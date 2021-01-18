@@ -116,10 +116,6 @@ public class AndFlmsg extends AppCompatActivity {
 
     public static int currentview = 0;
 
-    // Toast text display (declared here to allow for quick replacement rather
-    // than queuing)
-    private static Toast myToast;
-
     // Layout Views
     private static TextView myTermTV;
     private static ScrollView myTermSC;
@@ -263,52 +259,6 @@ public class AndFlmsg extends AppCompatActivity {
             }
         }
     };
-
-
-    // Runnable for updating the CPU load bar in Modem Window
-    public static final Runnable updateMfskPicture = new Runnable() {
-        public void run() {
-            //Update displayed bitmap
-            ImageView imageView = AndFlmsg.pwLayout.findViewById(R.id.imageView1);
-            if (imageView != null) {
-                imageView.setImageBitmap(Modem.picBitmap);
-            }
-        }
-    };
-
-
-    public void DisplayTime() {
-        runOnUiThread(new Runnable() {
-            public void run() {
-                //Now update progress info in Title if we are TXing
-                if (Processor.TXActive && !Modem.modemIsTuning) {
-                    int percent = Modem.getTxProgressPercent();
-                    txProgressCount = ": " + percent + "%";
-                    AndFlmsg.mHandler.post(AndFlmsg.updatetitle);
-                }
-            }
-        });
-    }
-
-
-    class DisplayTimeRunner implements Runnable {
-        // @Override
-        public void run() {
-            while (!Thread.currentThread().isInterrupted()) {
-                try {
-                    //Update time display in Terminal window
-                    DisplayTime();
-                    //Check every second if we have a new message Rx timeout
-                    Modem.checkExtractTimeout();
-                    Thread.sleep(1000);
-                } catch (InterruptedException e) {
-                    Thread.currentThread().interrupt();
-                } catch (Exception e) {
-                }
-            }
-        }
-    }
-
 
     @Override
     public void onBackPressed() {
@@ -553,38 +503,26 @@ public class AndFlmsg extends AppCompatActivity {
         //Set the Activity's Theme
         setTheme(R.style.andFlmsgStandard);
 
-        // Call the folder handling method
-        Processor.handlefolderstructure();
-
         // Get new gesture detector for flings over scrollviews
         mGesture = new GestureDetector(this, mOnGesture);
-
-        // Initialize Toast for use in the Toast display routines below
-        myToast = Toast.makeText(AndFlmsg.this, "", Toast.LENGTH_SHORT);
-
-        // Debug
-        // middleToastText("ONCREATE CALLED");
-
-        // Launch task for time display (Time is GPS time aligned if requested)
-        Runnable displayTimeRunnable = new DisplayTimeRunner();
-        Thread displayTimeThread = new Thread(displayTimeRunnable);
-        displayTimeThread.start();
 
         // Get last mode (if not set, returns -1)
         Processor.TxModem = Processor.RxModem = config.getPreferenceI("LASTMODEUSED", -1);
 
         // Get the RSID flags from stored preferences
-        config.getPreferenceB("TXRSID", true);
-        config.getPreferenceB("RXRSID", true);
+        Modem.txRsidOn = config.getPreferenceB("TXRSID", false);
+        Modem.rxRsidOn = config.getPreferenceB("RXRSID", false);
 
-        Modem.rxRsidOn = false;
-        Modem.txRsidOn = false;
+        System.out.println("RXRSID: " + Modem.rxRsidOn);
+        System.out.println("TXRSID: " + Modem.txRsidOn);
 
         //Update the list of available modems
         Modem.updateModemCapabilityList();
 
-        //If we do not have a last mode, this is the first time in the app (use NBEMS safest default: MT63-2000-Long)
-        if (Processor.RxModem == -1) Processor.RxModem = Modem.getMode("MT63_2000_LG");
+        //If we do not have a last mode, this is the first time in the app
+        if (Processor.RxModem == -1) {
+            Processor.RxModem = Modem.getMode("8PSK1000");
+        }
 
         // We start with the Terminal screen
         displayTerminal(NORMAL);
@@ -723,7 +661,7 @@ public class AndFlmsg extends AppCompatActivity {
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        middleToastText("requestCode" + requestCode);
+        Toast.makeText(AndFlmsg.this, "requestCode" + requestCode, Toast.LENGTH_SHORT).show();
     }
 
     // Option Menu
@@ -789,39 +727,6 @@ public class AndFlmsg extends AppCompatActivity {
                 break;
         }
         return true;
-    }
-
-    // Simple text transparent popups (Top of screen)
-    public static void topToastText(String message) {
-        try {
-            myToast.setText(message);
-            myToast.setGravity(Gravity.TOP, 0, 100);
-            myToast.show();
-        } catch (Exception ex) {
-            loggingclass.writelog("Toast Message error: " + ex.getMessage(), null, true);
-        }
-    }
-
-    // Simple text transparent popups TOWARDS MIDDLE OF SCREEN
-    public static void middleToastText(String message) {
-        try {
-            myToast.setText(message);
-            myToast.setGravity(Gravity.CENTER, 0, 0);
-            myToast.show();
-        } catch (Exception ex) {
-            loggingclass.writelog("Toast Message error: " + ex.getMessage(), null, true);
-        }
-    }
-
-    // Simple text transparent popups (Bottom of screen)
-    public static void bottomToastText(String message) {
-        try {
-            myToast.setText(message);
-            myToast.setGravity(Gravity.BOTTOM, 0, 100);
-            myToast.show();
-        } catch (Exception ex) {
-            loggingclass.writelog("Toast Message error: " + ex.getMessage(), null, true);
-        }
     }
 
     public static void screenAnimation(ViewGroup panel, int screenAnimation) {
@@ -917,8 +822,6 @@ public class AndFlmsg extends AppCompatActivity {
         myTermSC = findViewById(R.id.terminalscrollview);
         // update with whatever we have already accumulated then scroll
         AndFlmsg.mHandler.post(AndFlmsg.addtoterminal);
-        // Advise which screen we are in
-        middleToastText(getString(R.string.txt_TerminalScreen));
 
         //Restore the data entry field at the bottom
         EditText myView = findViewById(R.id.edit_text_out);
@@ -952,19 +855,10 @@ public class AndFlmsg extends AppCompatActivity {
                 //Clear the text field
                 view.setText("");
                 savedTextMessage = "";
-                //No exceptions thrown here???
-                //		try {
                 if (!Processor.ReceivingForm) {
                     Processor.TX_Text += (intext + "\n");
-                    // Processor.q.send_txrsid_command("ON");
                     Modem.txData("", "", intext + "\n", 0, 0, false, "");
-                } else {
-                    bottomToastText(getString(R.string.txt_NotInMiddleOfMessage));
                 }
-                //		}
-                //		catch (Exception ex) {
-                //		    loggingclass.writelog("Error reading back CSV file from spreadsheet editor" + ex.getMessage(), null, true);
-                //		}
             }
         });
     }
@@ -1005,98 +899,6 @@ public class AndFlmsg extends AppCompatActivity {
         myModemSC = findViewById(R.id.modemscrollview);
         // update with whatever we have already accumulated then scroll
         AndFlmsg.mHandler.post(AndFlmsg.addtomodem);
-
-        // Advise user of which screen we are in
-        middleToastText(getString(R.string.txt_ModemScreen));
-
-        // Initialize the RxRSID check box
-        checkbox = findViewById(R.id.rxrsid);
-        Modem.rxRsidOn = config.getPreferenceB("RXRSID", true);
-        checkbox.setChecked(Modem.rxRsidOn);
-        checkbox.setOnClickListener(new OnClickListener() {
-            public void onClick(View v) {
-                if (((CheckBox) v).isChecked()) {
-                    // Store preference
-                    config.setPreferenceB("RXRSID", true);
-                    Modem.rxRsidOn = true;
-                } else {
-                    // Store preference
-                    config.setPreferenceB("RXRSID", false);
-                    Modem.rxRsidOn = false;
-                }
-            }
-        });
-
-        // Initialize the TxRSID check box
-        checkbox = findViewById(R.id.txrsid);
-        Modem.txRsidOn = config.getPreferenceB("TXRSID", true);
-        checkbox.setChecked(Modem.txRsidOn);
-        checkbox.setOnClickListener(new OnClickListener() {
-            public void onClick(View v) {
-                if (((CheckBox) v).isChecked()) {
-                    // Store preference
-                    config.setPreferenceB("TXRSID", true);
-                    Modem.txRsidOn = true;
-                } else {
-                    // Store preference
-                    config.setPreferenceB("TXRSID", false);
-                    Modem.txRsidOn = false;
-                }
-            }
-        });
-
-        // JD Initialize the MODEM RX ON/OFF button
-        myButton = findViewById(R.id.button_modemONOFF);
-        setTextSize(myButton);
-        myButton.setOnClickListener(new OnClickListener() {
-            public void onClick(View v) {
-                try {
-                    if (ProcessorON) {
-                        if (Modem.modemState == Modem.RXMODEMRUNNING
-                                && !Processor.ReceivingForm
-                                && !Processor.TXActive) {
-                            modemPaused = true;
-                            Modem.stopRxModem();
-                            stopService(new Intent(AndFlmsg.this,
-                                    Processor.class));
-                            // Force garbage collection to prevent Out Of Memory
-                            // errors on small RAM devices
-                            System.gc();
-                            ProcessorON = false;
-                            // Set modem text as selectable
-                            TextView myTempModemTV = findViewById(R.id.modemview);
-                            if (myTempModemTV != null) {
-                                if (android.os.Build.VERSION.SDK_INT >= 11) {
-                                    myTempModemTV.setTextIsSelectable(true);
-                                }
-                            }
-                        } else {
-                            bottomToastText(getString(R.string.txt_ModemCannotStopNow));
-                        }
-                    } else {
-                        if (Modem.modemState == Modem.RXMODEMIDLE) {
-                            modemPaused = false;
-                            // Force garbage collection to prevent Out Of Memory
-                            // errors on small RAM devices
-                            System.gc();
-                            startService(new Intent(AndFlmsg.this,
-                                    Processor.class));
-                            ProcessorON = true;
-                            // Set modem text as NOT selectable (Only for Android 3.0 and UP)
-                            TextView myTempModemTV = findViewById(R.id.modemview);
-                            if (myTempModemTV != null) {
-                                if (android.os.Build.VERSION.SDK_INT >= 11) {
-                                    myTempModemTV.setTextIsSelectable(false);
-                                }
-                            }
-                        }
-                    }
-                    AndFlmsg.mHandler.post(AndFlmsg.updatetitle);
-                } catch (Exception ex) {
-                    loggingclass.writelog("Button Execution error: " + ex.getMessage(), null, true);
-                }
-            }
-        });
 
         // JD Initialize the MODE UP button
         myButton = findViewById(R.id.button_modeUP);
@@ -1143,84 +945,5 @@ public class AndFlmsg extends AppCompatActivity {
                 }
             }
         });
-
-        // JD Initialize the TUNE button
-        myButton = findViewById(R.id.button_tune);
-        setTextSize(myButton);
-        myButton.setOnClickListener(new OnClickListener() {
-            public void onClick(View v) {
-                try {
-
-                    if (!Processor.TXActive && !Processor.ReceivingForm
-                            && Modem.modemState == Modem.RXMODEMRUNNING) {
-                        Modem.TxTune();
-                    }
-                }
-                // JD fix this catch action
-                catch (Exception ex) {
-                    loggingclass.writelog("Button Execution error: " + ex.getMessage(), null, true);
-                }
-            }
-        });
-
     }
-
-
-    //Display Picture popup window
-    public void rxPicturePopup(int picW, int picH) {
-        // LayoutInflater for popup windows
-        LayoutInflater inflater = (LayoutInflater) this
-                .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-        pwLayout = inflater.inflate(R.layout.rxpicturepopup,
-                (ViewGroup) findViewById(R.id.html_popup));
-        Display display = ((WindowManager) getSystemService(WINDOW_SERVICE)).getDefaultDisplay();
-        /* Now we can retrieve all display-related infos */
-        int winWidth = display.getWidth();
-        int winHeight = display.getHeight();
-        // int orientation = display.getOrientation();
-        // create a large PopupWindow (it will be clipped automatically if larger than main window)
-        final PopupWindow pw = new PopupWindow(pwLayout, winWidth, winHeight, true);
-        pw.setBackgroundDrawable(new BitmapDrawable()); // to
-        // allow click event to be active, display the popup in the center
-        pw.showAtLocation(pwLayout, Gravity.TOP, 0, 0);
-        ImageView imageView = AndFlmsg.pwLayout.findViewById(R.id.imageView1);
-        //TextView emailText = (TextView) layout.findViewById(R.id.emailtext);
-        //mWebView = (WebView) layout.findViewById(R.id.imageView1);
-        // Return button init
-        myButton = pwLayout.findViewById(R.id.button_close);
-        setTextSize(myButton);
-        myButton.setOnClickListener(new OnClickListener() {
-            public void onClick(View v) {
-                pw.dismiss();
-            }
-        });
-        // Slant Left button init
-        myButton = pwLayout.findViewById(R.id.button_slant_left);
-        setTextSize(myButton);
-        myButton.setOnClickListener(new OnClickListener() {
-            public void onClick(View v) {
-                Modem.deSlant(+2);
-            }
-        });
-        // Slant Right button init
-        myButton = pwLayout.findViewById(R.id.button_slant_right);
-        setTextSize(myButton);
-        myButton.setOnClickListener(new OnClickListener() {
-            public void onClick(View v) {
-                Modem.deSlant(-2);
-            }
-        });
-        // Save Again button init
-        myButton = pwLayout.findViewById(R.id.button_save_again);
-        setTextSize(myButton);
-        myButton.setOnClickListener(new OnClickListener() {
-            public void onClick(View v) {
-                Modem.saveAnalogPicture(false); //Not a new picture
-            }
-        });
-
-        //imageView.scrollBy(x, y);
-
-    }
-
 }

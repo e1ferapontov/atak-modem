@@ -256,9 +256,7 @@ public class config {
                                     editor.putString(key, ((String) v));
                             }
                             editor.commit();
-                        } catch (FileNotFoundException e) {
-                            //e.printStackTrace();
-                            AndFlmsg.myInstance.topToastText(AndFlmsg.myContext.getString(R.string.txt_NoBackupFileFound));
+                        } catch (FileNotFoundException ignored) {
                         } catch (IOException e) {
                             e.printStackTrace();
                         } catch (ClassNotFoundException e) {
@@ -297,8 +295,9 @@ public class config {
                         SharedPreferences.Editor editor = AndFlmsg.mysp.edit();
 
                         //Restore RX and TX RSID in case they were disabled by error
-                        editor.putBoolean("RXRSID", true);
-                        editor.putBoolean("TXRSID", true);
+                        editor.putBoolean("RXRSID", false);
+                        editor.putBoolean("TXRSID", false);
+
 
                         //General and GUI
                         editor.putBoolean("USEMODELIST", false);
@@ -309,7 +308,7 @@ public class config {
                         editor.putBoolean("SLOWCPU", false);
                         //RSID
                         editor.putBoolean("TXPOSTRSID",false);
-                        editor.putBoolean("RSIDWIDESEARCH",true);
+                        editor.putBoolean("RSIDWIDESEARCH",false);
                         editor.putString("RSID_ERRORS", "2");
                         //8PSK
                         editor.putBoolean("8PSKPILOT",true);

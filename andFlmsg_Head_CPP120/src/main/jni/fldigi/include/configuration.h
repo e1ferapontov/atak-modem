@@ -90,7 +90,7 @@
               +20.0)                                                          */          \
         ELEM_(bool, rsidWideSearch, "RSIDWIDESEARCH",                                   \
               "RSID detector searches the entire passband",                             \
-              true)  /*Android changed from false */                                                                  \
+              false)  /*Android changed from false */                                                                  \
         ELEM_(int, rsid_squelch, "RSIDSQUELCH",                                         \
               "RSID detection opens squelch for nn seconds",                            \
               5)                                                                        \

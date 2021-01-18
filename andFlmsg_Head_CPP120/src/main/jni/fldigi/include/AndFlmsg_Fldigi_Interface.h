@@ -19,7 +19,7 @@ extern int getPreferenceI(string preferenceString, int defaultValue);
 extern double getPreferenceD(string preferenceString, double defaultValue);
 extern bool getPreferenceB(string preferenceString, bool defaultValue);
 extern void change_CModem(int newMode, double newFrequency);
-extern void androidShowRxViewer(int picW, int picH);
+extern void androidShowRxViewer();
 extern void androidSaveLastPicture();
 extern void androidUpdateRxPic(int data, int pos);
 

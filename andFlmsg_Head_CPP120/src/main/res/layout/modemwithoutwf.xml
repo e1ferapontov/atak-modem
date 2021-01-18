@@ -31,25 +31,6 @@
 		    android:minHeight="8dp"
 		    android:progress="0" />
 	</LinearLayout>
-    <LinearLayout
-        android:id="@+id/FrameLayout1A"
-        android:layout_width="fill_parent"
-        android:layout_height="18dp"
-        android:layout_weight="0.01" >
-        android:weightSum="1" >
-        <CheckBox
-            android:id="@+id/rxrsid"
-            android:layout_width="wrap_content"
-            android:layout_height="fill_parent"
-            android:layout_weight="0.5"
-            android:text="@string/bt_RxRsID" />
-        <CheckBox
-            android:id="@+id/txrsid"
-            android:layout_width="wrap_content"
-            android:layout_height="fill_parent"
-            android:layout_weight="0.5"
-            android:text="@string/bt_TxRsID" />
-    </LinearLayout>
 	<ScrollView android:id="@+id/modemscrollview"
 		android:layout_width="fill_parent"
 		android:layout_height="0dp"
@@ -97,29 +78,11 @@
 			android:layout_weight="0.5"
 			android:layout_width="0dp">
 		</Button>
-		<Button android:id="@+id/button_modemONOFF"
-			android:text="@string/bt_ModemOnOff"
-			android:layout_height="fill_parent"
-			android:layout_width="0dp"
-			android:layout_weight="0.5">
-		</Button>
-	</LinearLayout>
-	<LinearLayout android:id="@+id/FrameLayout4"
-		android:layout_width="fill_parent"
-		android:layout_height="47dp"
-		android:layout_weight="0.03"
-		android:weightSum="1">
 		<Button android:id="@+id/button_modeDOWN"
 			android:text="@string/bt_PrevMode"
 			android:layout_height="fill_parent"
 			android:layout_weight="0.5"
 			android:layout_width="0dp">
-		</Button>
-		<Button android:id="@+id/button_tune"
-			android:text="@string/bt_Tune"
-			android:layout_height="fill_parent"
-			android:layout_width="0dp"
-			android:layout_weight="0.5">
 		</Button>
 	</LinearLayout>
 </LinearLayout>

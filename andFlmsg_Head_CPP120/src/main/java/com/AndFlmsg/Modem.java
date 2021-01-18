@@ -15,26 +15,18 @@
 
 package com.AndFlmsg;
 
-import android.app.Activity;
-import android.content.*;
+import android.content.SharedPreferences;
 import android.graphics.Bitmap;
-import android.media.*;
-import android.media.MediaRecorder.*;
-
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.util.Locale;
-import java.util.regex.*;
-
+import android.media.AudioFormat;
+import android.media.AudioManager;
+import android.media.AudioRecord;
+import android.media.AudioTrack;
+import android.media.MediaRecorder.AudioSource;
 import android.os.Process;
-import android.provider.MediaStore;
-import android.provider.MediaStore.Images;
-import android.util.Base64;
-import android.widget.Button;
+
+import java.nio.charset.StandardCharsets;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class Modem {
 
@@ -138,10 +130,6 @@ public class Modem {
 
     private native static void saveEnv();
 
-    private native static void txRSID();
-
-    public native static int getTxProgressPercent();
-
     private native static void setSlowCpuFlag(boolean slowcpu);
 
 
@@ -169,297 +157,6 @@ public class Modem {
             if (res < 0)
                 loggingclass.writelog("Error in writing sound buffer: " + res, null, true);
         }
-    }
-
-
-    //Called from the C++ side to echo the transmitted characters
-    public static void putEchoChar(int txedChar) {
-        Processor.monitor += (char) txedChar;
-        AndFlmsg.mHandler.post(AndFlmsg.addtomodem);
-    }
-
-
-    //Called from the C++ native side to initialize a new picture and associated viewer. 
-    public static void showRxViewer(final int mpicW, final int mpicH) {
-        //Less than 20 seconds between the end of the text message and
-        //	the start of mfsk picture transmission
-        if (Processor.lastMessageNoExpectedImages > 0)
-            Processor.pictureRxInTime = (System.currentTimeMillis() -
-                    Processor.lastMessageEndTxTime < 25000);
-
-        //Save size for later
-        mfskPicWidth = mpicW;
-        mfskPicHeight = mpicH;
-        //Create buffer
-        picBuffer = new int[mpicH * mpicW];
-        //Create bitmap
-        picBitmap = Bitmap.createBitmap(picBuffer, mfskPicWidth, mfskPicHeight, Bitmap.Config.ARGB_8888);
-        //Reset pixel pointer
-        pixelNumber = 0;
-        //Open the popup window
-        ((Activity) AndFlmsg.myContext).runOnUiThread(new Runnable() {
-            public void run() {
-                // Display the RX picture popup window
-                ((AndFlmsg) AndFlmsg.myContext).rxPicturePopup(mpicW, mpicH);
-            }
-        });
-    }
-
-
-    //Called from the C++ native side to update pixels in a picture. 
-    public static void updatePicture(int data[], int picWidth) {
-        if (picBuffer != null) {
-            //Add a row to the bitmap
-            int ii = 0;
-            for (int i = 0; i < picWidth; i++) {
-                ii = i * 3; //3 bytes per pixel
-                picBuffer[pixelNumber++] = 0xff000000 | (data[ii] << 16) | (data[ii + 1] << 8) | data[ii + 2];
-            }
-            //Create bitmap
-            picBitmap = Bitmap.createBitmap(picBuffer, mfskPicWidth, mfskPicHeight, Bitmap.Config.ARGB_8888);
-            //update bitmap instead of re-creating at every line update (causes a lot of garbage collections and stops the processes)
-            //Fix immutable state of Bitmap first (See Stack Overflow for backward compatible solutions)
-            //try {
-            //    picBitmap.setPixels(picBuffer, pixelNumber - picWidth, picWidth, 1, (pixelNumber - picWidth) / mfskPicHeight, picWidth, 1);
-            //} catch (Exception e) {
-            //    e.printStackTrace();
-            //}
-            //Display updated bitmap
-            AndFlmsg.mHandler.post(AndFlmsg.updateMfskPicture);
-        }
-    }
-
-
-    //Called from the C++ native side to save the last received picture. 
-    public static void saveLastPicture() {
-
-        saveAnalogPicture(true); //New picture
-
-        //Increment picture counter if still expecting more
-        if (Processor.currentImageSequenceNo < Processor.lastMessageNoExpectedImages) {
-
-            Processor.currentImageSequenceNo++;
-        }
-
-        //Reset the time counter to the end of  the last picture Transmission
-        Processor.lastMessageEndTxTime = System.currentTimeMillis();
-
-        //Make the de-salanting buttons visible and pre-set the de-slanting amount
-        slantValue = 0;
-        //Enable the edit buttons
-        ((Activity) AndFlmsg.myContext).runOnUiThread(new Runnable() {
-            public void run() {
-                Button editButton;
-                editButton = (Button) AndFlmsg.pwLayout.findViewById(R.id.button_slant_left);
-                if (editButton != null) editButton.setEnabled(true);
-                editButton = (Button) AndFlmsg.pwLayout.findViewById(R.id.button_slant_right);
-                if (editButton != null) editButton.setEnabled(true);
-                editButton = (Button) AndFlmsg.pwLayout.findViewById(R.id.button_save_again);
-                if (editButton != null) editButton.setEnabled(true);
-            }
-        });
-    }
-
-
-    //Save and re-save analog picture
-    public static void saveAnalogPicture(boolean newPicture) {
-        String fileName = "";
-        String filePath = "";
-
-        try {
-            if ((Processor.lastMessageNoExpectedImages > 0) && (Processor.pictureRxInTime || !newPicture)) {
-                String inboxFolderPath = Processor.HomePath + Processor.Dirprefix + Processor.DirInbox +
-                        Processor.Separator;
-                String tempFolderPath = Processor.HomePath + Processor.Dirprefix + Processor.DirTemp +
-                        Processor.Separator;
-                fileName = "rx_imgtoappend.pic";
-                File imgFile = new File(tempFolderPath + fileName);
-                FileOutputStream out = new FileOutputStream(imgFile);
-                File fi = new File(inboxFolderPath + Processor.lastReceivedMessageFname);
-                if (!fi.isFile()) {
-                    AndFlmsg.middleToastText(AndFlmsg.myContext.getString(R.string.txt_FileNotFound) + ": " +
-                            Processor.lastReceivedMessageFname);
-                    return;
-                }
-                FileInputStream fileISi = new FileInputStream(fi);
-                BufferedReader buf0 = new BufferedReader(new InputStreamReader(fileISi));
-                String readString0 = new String();
-                FileOutputStream fileOutputStrm = null;
-                fileOutputStrm = new FileOutputStream(tempFolderPath + Processor.lastReceivedMessageFname);
-                try {
-                    picBitmap.compress(Bitmap.CompressFormat.PNG, 100, out);
-                    out.flush();
-                    out.close();
-                    //Read the compressed image file
-                    long fileSize = imgFile.length();
-                    //Read the full file in a byte buffer
-                    byte[] rawPictureBuffer = new byte[(int) fileSize];
-                    FileInputStream fileIs = new FileInputStream(imgFile);
-                    fileIs.read(rawPictureBuffer);
-                    //Add Field name and encode in Base64 to make it text compatible
-                    int fieldIndex = Processor.currentImageSequenceNo;
-                    if (!newPicture) {
-                        if (fieldIndex > 0) fieldIndex--;
-                    }
-                    String imageField = Processor.lastMessageImgFieldName[fieldIndex] + ",";
-                    String encodedImageLine = imageField + "data:image/png;base64," +
-                            Base64.encodeToString(rawPictureBuffer, Base64.NO_WRAP) + "\n";
-                    //Insert in received message File, replacing "_imgXYZ,<analog 1>" with "_imgXYZ,data....
-                    while ((readString0 = buf0.readLine()) != null) {
-
-//To-Do: currently if we miss an image Rx, we loose sync between image and field sequence number 
-// We need a prefix before image Tx to positively identify the file and field related to the received image
-//Need a sequence like for example: 
-//~FLMSG:VK2ETA-20150808-111437Z-90.k2s
-//~FIELD:_imgsignature1
-//Sending Pic:WxH;
-
-                        //Do we have a match with expected image field stored during message text reception
-                        if (readString0.startsWith(imageField)) {
-                            readString0 = encodedImageLine; //substitute placeholder with Rx image data
-                        } else {
-                            readString0 += "\n";
-                        }
-                        //Write that line
-                        fileOutputStrm.write(readString0.getBytes(), 0, readString0.length());
-                    }
-                } catch (IOException e) {
-                    //Processor.PostToTerminal("Error copying: " + fileName + " " + e + "\n");
-                    loggingclass.writelog("Error copying: " + fileName, e, true);
-                } finally {
-                    try {
-                        if (fileISi != null) {
-                            fileISi.close();
-                        }
-                        if (fileOutputStrm != null) {
-                            fileOutputStrm.close();
-                        }
-                        if (out != null) {
-                            out.close();
-                        }
-                    } catch (IOException e) {
-                        //Processor.PostToTerminal("File close error: " + e + "\n");
-                        loggingclass.writelog("File close error: ", e, true);
-                    }
-                }
-                //Delete original file in Inbox folder
-                Message.deleteFile(Processor.DirInbox, Processor.lastReceivedMessageFname, false);
-                //Copy new temp file in place of original
-                Message.copyAnyFile(Processor.DirTemp, Processor.lastReceivedMessageFname, Processor.DirInbox, false);
-                //Display a message
-                AndFlmsg.topToastText(AndFlmsg.myContext.getString(R.string.txt_ImageInsertedInMessage) + ": " + Processor.lastReceivedMessageFname);
-            } else { //Arrived too late, don't attach automatically
-                if (newPicture && (Processor.lastMessageNoExpectedImages > 0) && !Processor.pictureRxInTime) {
-                    //Display a message, but save the image as an independant picture
-                    AndFlmsg.topToastText(AndFlmsg.myContext.getString(R.string.txt_ImageReceivedTooLate));
-                }
-            }
-
-            //In any case, save the image file for further usage if required
-            if (newPicture) {
-                fileName = Message.dateTimeStamp() + ".png";
-                lastSavedPictureFn = fileName;
-            } else {
-                fileName = lastSavedPictureFn;
-            }
-            filePath = Processor.HomePath + Processor.Dirprefix + Processor.DirImages +
-                    Processor.Separator;
-            File dest = new File(filePath + fileName);
-            FileOutputStream out = new FileOutputStream(dest);
-            picBitmap.compress(Bitmap.CompressFormat.PNG, 100, out);
-            out.flush();
-            out.close();
-            //Make it available in the System Picture Gallery
-            ContentValues values = new ContentValues();
-            values.put(Images.Media.TITLE, fileName);
-            values.put(Images.Media.DATE_TAKEN, System.currentTimeMillis());
-            values.put(Images.ImageColumns.BUCKET_ID, dest.toString().toLowerCase(Locale.US).hashCode());
-            values.put(Images.ImageColumns.BUCKET_DISPLAY_NAME, dest.getName().toLowerCase(Locale.US));
-            values.put("_data", dest.getAbsolutePath());
-            if (Processor.lastMessageNoExpectedImages > 0) {
-                values.put(Images.Media.DESCRIPTION, "Flmsg Image");
-            } else {
-                values.put(Images.Media.DESCRIPTION, "Fldigi Image");
-                //Display a message
-                AndFlmsg.topToastText(AndFlmsg.myContext.getString(R.string.txt_SavedImage) + ": " + fileName +
-                        "\n\n" + AndFlmsg.myContext.getString(R.string.txt_UseGalleryToView));
-            }
-            ContentResolver cr = AndFlmsg.myContext.getContentResolver();
-            cr.insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, values);
-        } catch (Exception e) {
-            loggingclass.writelog("Exception Error in 'saveLastPicture' " + e.getMessage(), null, true);
-        }
-    }
-
-
-    //Corrects the slant in a received image. Applies the cummulative step parameter.
-    public static void deSlant(int step) {
-
-        slantValue += step;
-        if (slantValue > mfskPicWidth) slantValue = mfskPicWidth;
-        if (slantValue < -1 * mfskPicWidth) slantValue = -1 * mfskPicWidth;
-        int pixelNumberAtLineY, sourcePixelNumber, sourcePixel, sourceNextPixel;
-        int nextPixelStep = slantValue < 0 ? -1 : 1;
-        int pixelShift;
-        double thisPixel, nextPixel;
-        double slantLineInc = (double) slantValue / (double) mfskPicHeight;
-        int[] deSlantedPic = new int[picBuffer.length];
-        //copy first line as-is (it is the time/spacial reference)
-        for (int x = 0; x < mfskPicWidth; x++) {
-            deSlantedPic[x] = picBuffer[x];
-        }
-        //Perform "de-slanting" from the 2n line onwards
-        for (int y = 1; y < mfskPicHeight; y++) {
-            pixelNumberAtLineY = mfskPicWidth * y;
-            pixelShift = (int) (y * slantLineInc);
-            nextPixel = Math.abs((y * slantLineInc) - (double) pixelShift);
-            thisPixel = 1 - nextPixel;
-
-            //Shift pixels using fractional value
-            for (int x = 0; x < mfskPicWidth; x++) {
-                if (x + pixelShift >= 0 && x + pixelShift < mfskPicWidth) {
-                    sourcePixelNumber = pixelShift + pixelNumberAtLineY + x > picBuffer.length - 2 ?
-                            picBuffer.length - 2 : pixelShift + pixelNumberAtLineY + x;
-                    sourcePixel = picBuffer[sourcePixelNumber];
-                    sourceNextPixel = picBuffer[sourcePixelNumber + nextPixelStep];
-                    double red1 = (((sourcePixel & 0x00ff0000) >> 16) * thisPixel);
-                    double red2 = (((sourceNextPixel & 0x00ff0000) >> 16) * nextPixel);
-                    int red = (int) (red1 + red2);
-                    double green1 = (((sourcePixel & 0x0000ff00) >> 8) * thisPixel);
-                    double green2 = (((sourceNextPixel & 0x0000ff00) >> 8) * nextPixel);
-                    int green = (int) (green1 + green2);
-                    double blue1 = ((sourcePixel & 0x000000ff) * thisPixel);
-                    double blue2 = ((sourceNextPixel & 0x000000ff) * nextPixel);
-                    int blue = (int) (blue1 + blue2);
-                    deSlantedPic[pixelNumberAtLineY + x] = 0xff000000 | (red << 16) | (green << 8) | blue;
-                } else {
-                    //The line is wrapped around, so need to use the previous/next line pixels
-                    sourcePixelNumber = pixelShift + pixelNumberAtLineY + x - (mfskPicWidth * nextPixelStep) > picBuffer.length - 2 ?
-                            picBuffer.length - 2 : pixelShift + pixelNumberAtLineY + x - (mfskPicWidth * nextPixelStep);
-                    sourcePixel = picBuffer[sourcePixelNumber];
-                    sourceNextPixel = picBuffer[sourcePixelNumber + nextPixelStep];
-                    double red1 = (((sourcePixel & 0x00ff0000) >> 16) * thisPixel);
-                    double red2 = (((sourceNextPixel & 0x00ff0000) >> 16) * nextPixel);
-                    int red = (int) (red1 + red2);
-                    double green1 = (((sourcePixel & 0x0000ff00) >> 8) * thisPixel);
-                    double green2 = (((sourceNextPixel & 0x0000ff00) >> 8) * nextPixel);
-                    int green = (int) (green1 + green2);
-                    double blue1 = ((sourcePixel & 0x000000ff) * thisPixel);
-                    double blue2 = ((sourceNextPixel & 0x000000ff) * nextPixel);
-                    int blue = (int) (blue1 + blue2);
-                    //Colors have been shifted as we transmit one line of Red, one of Green, then one of Blue
-                    if (nextPixelStep > 0) { //Slant towards left
-                        deSlantedPic[pixelNumberAtLineY + x] = 0xff000000 | red | (green << 16) | (blue << 8);
-                    } else { //Slant towards right
-                        deSlantedPic[pixelNumberAtLineY + x] = 0xff000000 | (red << 8) | green | (blue << 16);
-                    }
-                }
-            }
-        }
-        picBitmap = Bitmap.createBitmap(deSlantedPic, mfskPicWidth, mfskPicHeight, Bitmap.Config.ARGB_8888);
-        deSlantedPic = null; //Release for GC
-        AndFlmsg.mHandler.post(AndFlmsg.updateMfskPicture);
-
     }
 
 
@@ -495,29 +192,9 @@ public class Modem {
                 }
             }
         }
-        //Do we want to use a custom list of modes?
-        boolean useModeList = config.getPreferenceB("USEMODELIST", false);
-        if (useModeList) {
-            customNumModes = 0;
-            boolean thatmode;
-            for (int i = 0; i < numModes; i++) {
-                thatmode = config.getPreferenceB("USE" + modemCapListString[i], false);
-                if (thatmode) {
-                    customModeListInt[customNumModes] = modemCapListInt[i];
-                    customModeListString[customNumModes++] = modemCapListString[i];
-                }
-            }
-        } else {
-            customModeListInt = modemCapListInt;
-            customModeListString = modemCapListString;
-            customNumModes = numModes;
-        }
-        //Check that we have at least one mode (if not, take the first in the capability list)
-        if (customNumModes < 1) {
-            customNumModes = 1;
-            customModeListInt[0] = modemCapListInt[0];
-            customModeListString[0] = modemCapListString[0];
-        }
+        customModeListInt = modemCapListInt;
+        customModeListString = modemCapListString;
+        customNumModes = numModes;
     }
 
 
@@ -587,13 +264,10 @@ public class Modem {
         //To check is the modem can TX pictures, use the mode name
         int j = getModeIndexFullList(thisMode);
         String modemName = modemCapListString[j];
-        if (modemName.equalsIgnoreCase("MFSK16") ||
+        return modemName.equalsIgnoreCase("MFSK16") ||
                 modemName.equalsIgnoreCase("MFSK32") ||
                 modemName.equalsIgnoreCase("MFSK64") ||
-                modemName.equalsIgnoreCase("MFSK128")) {
-            return true;
-        } else
-            return false;
+                modemName.equalsIgnoreCase("MFSK128");
     }
 
 
@@ -708,7 +382,7 @@ public class Modem {
                         endproctime = System.currentTimeMillis();
                         double buffertime = (double) numSamples8K / 8000.0 * 1000.0; //in milliseconds
                         if (numSamples8K > 0)
-                            Processor.cpuload = (int) (((double) (endproctime - startproctime)) / buffertime * 100);
+                            Processor.cpuload = (int) ((endproctime - startproctime) / buffertime * 100);
                         if (Processor.cpuload > 100) Processor.cpuload = 100;
                         AndFlmsg.mHandler.post(AndFlmsg.updatecpuload);
                         //Android try faster mode changes by having a smaller buffer to process						numSamples8K = audiorecorder.read(so8K, 0, 8000/4); //process only part of the buffer to avoid lumpy processing
@@ -752,9 +426,7 @@ public class Modem {
                                 //Then process the RX data
                                 modemReturnedString = rxCProcess(so8K, numSamples8K);
                                 //Retreive latest signal quality for display
-                                //Remove averaging metric = misc.decayavg(metric, getMetric(), 20);
                                 metric = getMetric();
-                                //metric = getMetric();
                                 AndFlmsg.mHandler.post(AndFlmsg.updatesignalquality);
                                 //Now process all the characters received
                                 for (int i = 0; i < modemReturnedString.length(); i++) {
@@ -875,56 +547,6 @@ public class Modem {
                 }
                 //	            Main.DCD = 0;
                 break;
-            case ']':
-                if (Processor.ReceivingForm) {
-                    BlockString += inChar;
-                    //Did we receive a new start of block before the end
-                    //of the previous block? If so, restart reception
-                    if (BlockString.endsWith("[WRAP:beg]")) {
-                        BlockString = "[WRAP:beg]";
-                        Processor.PostToTerminal(AndFlmsg.myContext.getString(R.string.txt_ReceivingNewMessageDiscardingOld));
-                    } else if (BlockString.endsWith("[WRAP:lf]")) {
-                        WrapLF = true;
-                    } else if (BlockString.endsWith("[WRAP:crlf]")) {
-                        WrapLF = false;
-                    } else if (BlockString.endsWith("[WRAP:end]")) {
-                        //We have a complete block, process it
-                        //Processor.PostToTerminal("End of Message. Processing...\n");
-                        Processor.processWrapBlock(BlockString);
-                        Processor.CrcString = "";
-                        Processor.FileNameString = "";
-                        Processor.ReceivingForm = false;
-                        FirstBracketReceived = false;
-                    } else {
-                        //Check for CRC section
-                        Pattern psc = Pattern.compile("WRAP:chksum ([0-9A-F]{4})");
-                        Matcher msc = psc.matcher(BlockString);
-                        if (msc.find()) {
-                            Processor.CrcString = msc.group(1);
-                            //Processor.PostToTerminal("Checksum <" + Processor.CrcString + ">\n");
-                        }
-                        //Check for file name section
-                        psc = Pattern.compile("\\[WRAP:fn (.+\\..+)\\]");
-                        msc = psc.matcher(BlockString);
-                        if (msc.find()) {
-                            if (BlockString.endsWith(msc.group(0))) {
-                                Processor.FileNameString = msc.group(1);
-                                Processor.PostToTerminal("\n" + AndFlmsg.myContext.getString(R.string.txt_ReceivingFile) + ": " + Processor.FileNameString);
-                                //Processor.PostToTerminal("\n" + msc.group(0) + "\n");
-                            }
-                        }
-                    }
-                } else {
-                    BlockString += inChar;
-                    if (BlockString.endsWith("[WRAP:beg]")) {
-                        FirstBracketReceived = true;
-                        BlockString = "[WRAP:beg]";
-                        Processor.ReceivingForm = true;
-                        Processor.PostToTerminal(AndFlmsg.myContext.getString(R.string.txt_ReceivingNewMessage));
-                    }
-
-                }
-                break;
             case 10: //Line Feed
                 MonitorString += "\n";
                 if (Processor.ReceivingForm ||
@@ -1000,9 +622,9 @@ public class Modem {
         private String txFolder = "";
         private String txFileName = "";
         private int txNumberOfImagesToTx = 0;
-        private int txPictureTxSpeed;
-        private int txPictureColour;
-        private String txPictureTxMode;
+        private final int txPictureTxSpeed;
+        private final int txPictureColour;
+        private final String txPictureTxMode;
 
         public TxThread(String sendingFolder, String sendingFileName, String Sendline,
                         int numberOfImagesToTx,
@@ -1056,7 +678,7 @@ public class Modem {
                         //Modem.txCProcess(txSendline.getBytes(), txSendline.length());
                         byte[] bytesToSend = null;
                         try {
-                            bytesToSend = txSendline.getBytes("UTF-8");
+                            bytesToSend = txSendline.getBytes(StandardCharsets.UTF_8);
                         } catch (Exception e) { //Invalid UTF-8 characters
                             bytesToSend[0] = 0;//Null character
                         }
@@ -1082,13 +704,11 @@ public class Modem {
                         Thread.sleep(500);
                         txAt.release();
 
-                        long endTime   = System.nanoTime();
+                        long endTime = System.nanoTime();
                         long totalTime = (endTime - startTime) / 1000000;
                         System.out.println("TX duration, ms: " + totalTime);
                         System.out.println("TX, bytes: " + bytesToSend.length);
                         System.out.println("TX rate, bit/s: " + (bytesToSend.length * 8) / (totalTime / 1000));
-
-                        AndFlmsg.middleToastText("TX rate, bit/s: " + (bytesToSend.length * 8) / (totalTime / 1000));
                     } catch (Exception e) {
                         loggingclass.writelog("Can't output sound. Is Sound device busy?", null, true);
                     } finally {
@@ -1108,99 +728,4 @@ public class Modem {
             }
         }
     }
-
-
-    //Send Tune in a separate thread so that the UI thread is not blocked
-    //  during TX
-    public static void TxTune() {
-        Runnable TxTuneRun = new TxTuneThread();
-        new Thread(TxTuneRun).start();
-    }
-
-    private static class TxTuneThread implements Runnable {
-        private AudioTrack at = null;
-
-        public TxTuneThread() {
-        }
-
-        public void run() {
-
-            //Let the regular title update kno we are just tuning, not transmitting a document
-            modemIsTuning = true;
-
-            //Stop the modem receiving side
-            pauseRxModem();
-
-            //Wait 1/2 second so that if there is potential RF feedback
-            //  on the touchscreen we do not start TXing while the
-            //  finger is still on the screen
-            try {
-                Thread.sleep(500);
-            } catch (InterruptedException e1) {
-                // TODO Auto-generated catch block
-                e1.printStackTrace();
-            }
-            Processor.TXActive = true;
-            AndFlmsg.mHandler.post(AndFlmsg.updatetitle);
-
-            String frequencySTR = config.getPreferenceS("AFREQUENCY", "1500");
-            int frequency = Integer.parseInt(frequencySTR);
-
-            int volumebits = Integer.parseInt(config.getPreferenceS("VOLUME", "8"));
-
-            //Note the multiplier value for the buffer size
-            int intSize = 4 * android.media.AudioTrack.getMinBufferSize(8000,
-                    AudioFormat.CHANNEL_OUT_MONO, AudioFormat.ENCODING_PCM_16BIT);
-
-            if (AndFlmsg.toBluetooth) {
-                //Android Bluetooth hack test
-                //		        	at = new AudioTrack(AudioManager.STREAM_MUSIC, 8000, AudioFormat.CHANNEL_CONFIGURATION_MONO, AudioFormat.ENCODING_PCM_16BIT, intSize , AudioTrack.MODE_STREAM);
-                at = new AudioTrack(AudioManager.STREAM_VOICE_CALL, 8000, AudioFormat.CHANNEL_OUT_MONO, AudioFormat.ENCODING_PCM_16BIT, intSize, AudioTrack.MODE_STREAM);
-            } else {
-                at = new AudioTrack(AudioManager.STREAM_MUSIC, 8000, AudioFormat.CHANNEL_OUT_MONO, AudioFormat.ENCODING_PCM_16BIT, intSize, AudioTrack.MODE_STREAM);
-            }
-
-            //Open audiotrack
-            at.setStereoVolume(1.0f, 1.0f);
-            at.play();
-
-            int sr = 8000; // should be active_modem->get_samplerate();
-            int symlen = (int) (1 * sr); //1 second buffer
-            short[] outbuf = new short[symlen];
-
-            double phaseincr;
-            double phase = 0.0;
-            phaseincr = 2.0 * Math.PI * frequency / sr;
-
-            for (int i = 0; i < 3; i++) { //3 seconds tune
-                for (int j = 0; j < symlen; j++) {
-                    phase += phaseincr;
-                    if (phase > 2.0 * Math.PI) phase -= 2.0 * Math.PI;
-                    outbuf[j] = (short) ((int) (Math.sin(phase) * 8386560) >> volumebits);
-                }
-                at.write(outbuf, 0, symlen);
-            }
-
-            //Stop audio track
-            at.stop();
-            //Wait for end of audio play to avoid
-            //overlaps between end of TX and start of RX
-            while (at.getPlayState() == AudioTrack.PLAYSTATE_PLAYING) {
-                try {
-                    Thread.sleep(50);
-                } catch (InterruptedException e) {
-                    // TODO Auto-generated catch block
-                }
-            }
-            //Close audio track
-            at.release();
-            Processor.TXActive = false;
-            //Restart the modem receiving side
-            unPauseRxModem();
-            modemIsTuning = false;
-            AndFlmsg.mHandler.post(AndFlmsg.updatetitle);
-        }
-    }
-
-    ;
 }

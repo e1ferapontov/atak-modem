@@ -266,56 +266,16 @@ extern void put_echo_char(unsigned int txedChar) {
 
 
 //Prepare a new Picture receiving file and display screen for MFSK picture Rx
-void androidShowRxViewer(int picW, int picH) {
-	//Save picture size for later
-	pictureW = picW;
-	pictureH = picH;
-	//Find the Java class
-	jclass cls = gEnv->FindClass("com/AndFlmsg/Modem");
-	//Find the static Java method (see signature)
-	jmethodID mid = gEnv->GetStaticMethodID(cls, "showRxViewer", "(II)V");
-	//Call the method with the parameters
-	gEnv->CallStaticVoidMethod(cls, mid, picW, picH);
-	//Release the variables
-	gEnv->DeleteLocalRef(cls);
-}
+void androidShowRxViewer() {}
 
 
 //Save the last Picture to file (MFSK picture Rx)
 void androidSaveLastPicture() {
-	//Find the Java class
-	jclass cls = gEnv->FindClass("com/AndFlmsg/Modem");
-	//Find the static Java method (see signature)
-	jmethodID mid = gEnv->GetStaticMethodID(cls, "saveLastPicture", "()V");
-	//Call the method with the parameters
-	gEnv->CallStaticVoidMethod(cls, mid);
-	//Release the variables
-	gEnv->DeleteLocalRef(cls);
-
 }
 
 
 //Update one datum of Current Rx picture(MFSK picture Rx)
 void androidUpdateRxPic(int data, int pixelNumber) {
-
-	if (pixelNumber < 4096 * 3) {
-		pictureRow[pixelNumber] = data;
-	}
-	if (pixelNumber == 3 * pictureW - 1) { //Full row of bytes (3 per pixels), update bitmap.
-		//Find the Java class
-		jclass cls = gEnv->FindClass("com/AndFlmsg/Modem");
-		//Find the static Java method (see signature)
-		jmethodID mid = gEnv->GetStaticMethodID(cls, "updatePicture", "([II)V");
-		//Create a Java array and copy the C++ array into it
-		jintArray jPictureRow = gEnv->NewIntArray(pictureW * 3);
-		gEnv->SetIntArrayRegion(jPictureRow, 0, pictureW * 3, pictureRow);
-		//Call the method with the parameters
-		gEnv->CallStaticVoidMethod(cls, mid, jPictureRow, pictureW);
-		//Release the variables
-		gEnv->DeleteLocalRef(cls);
-		gEnv->DeleteLocalRef(jPictureRow);
-	}
-
 }
 
 

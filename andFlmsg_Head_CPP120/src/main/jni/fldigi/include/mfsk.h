@@ -65,7 +65,7 @@ extern	void	TxViewerResize(int W, int H);
 extern	void	showTxViewer(int W, int H);
 extern	void	createTxViewer();
 extern	void	createRxViewer();
-extern	void	showRxViewer(int W, int H);
+extern	void	showRxViewer();
 extern	void	deleteRxViewer();
 extern	void	deleteTxViewer();
 

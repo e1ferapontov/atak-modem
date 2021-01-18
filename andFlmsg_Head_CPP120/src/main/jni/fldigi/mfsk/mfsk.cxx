@@ -439,7 +439,6 @@ void mfsk::recvpic(cmplx z)
 			//pixelnbr = rgb + row + 3*col;
 			pixelnbr = rgb + 3*col;
 			//Android REQ(updateRxPic, byte, pixelnbr);
-			androidUpdateRxPic(byte, pixelnbr);
 			if (++col == picW) {
 				col = 0;
 				if (++rgb == 3) {
@@ -452,7 +451,6 @@ void mfsk::recvpic(cmplx z)
 				//Android: process one row at a time
 				pixelnbr = i + 3*col;
 				//Android  REQ(updateRxPic, byte, pixelnbr++);
-				androidUpdateRxPic(byte, pixelnbr);
 			}
 			if (++col == picW) {
 				col = 0;
@@ -892,7 +890,6 @@ int mfsk::rx_process(const short *buf, int len)
 				counter = picturesize;
 				rxstate = RX_STATE_PICTURE;
 				//Android REQ( showRxViewer, picW, picH );
-				androidShowRxViewer(picW, picH);
 			}
 		}
 		if (rxstate == RX_STATE_PICTURE) {
@@ -902,7 +899,6 @@ int mfsk::rx_process(const short *buf, int len)
 
 				//Android not used in C++	string autosave_dir = PicsDir;
 				//Android picRx->save_png(autosave_dir.c_str());
-				androidSaveLastPicture();
 				rx_init();
 			} else
 				recvpic(z);
