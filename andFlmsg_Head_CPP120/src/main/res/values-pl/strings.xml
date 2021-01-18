@@ -37,7 +37,6 @@
     <string name="bt_SpeedColor">Prędkość/Kolor</string>
     <string name="bt_SqlchDown">Blokada Szumu - </string>
     <string name="bt_SqlchUp">Blokada Szumu + </string>
-    <string name="bt_StopTx">Stop Nadawania</string>
     <string name="bt_Templates">Szablony</string>
     <string name="bt_ToOutbox">Do Nadawcza</string>
     <string name="bt_TransferFormOnly">Wyślij Formularz</string>
@@ -170,18 +169,6 @@
     <string name="txt_NotInMiddleOfMessage">Nie w trakcie odbierania Wiadomości</string>
     <string name="txt_Ok">Ok</string>
     <string name="txt_OutboxView">Nadawcza\n\n Wciśnij Długo na Wiadomości by Wybrać i Wysłać</string>
-    <string name="txt_PermissionsExplained">"Za chwilę otrzymasz serię pytań związanych z uprawnieniami aplikacji.
-                \nWszystkie uprawnienia są niezbędne, aby ta aplikacja działała zgodnie z przeznaczeniem.
-                \nJeśli zablokujesz jakiekolwiek uprawnienia, aplikacja nie będzie działać i zakończy działanie.
-                \n\nWyjaśnienia dotyczące uprawnień:
-                \n1. Dostęp do dokładnej lokalizacji: GPS służy do wyświetlania dokładnego czasu, gdy nie znajdujesz się w zasięgu sieci GSM.
-                \n2. Bluetooth i administrator Bluetooth: Aby wysyłać i odbierać dźwięk modemu za pośrednictwem urządzenia Bluetooth.
-                \n3. Zapis na karcie SD: dostęp do katalogu aplikacji na karcie SD (wewnętrznej lub zewnętrznej) do przechowywania wiadomości i obrazów
-                \n4. Nagrywanie i zmiana ustawienień dźwięku: Aby przechwycić dźwięk z wewnętrznego lub zewnętrznego mikrofonu i dostosować ustawienia.
-                \n5. Internet: do wyświetlania i odbierania danych z formularzy HTML używanych przez Flmsg.
-                \n6. Powiadomienia: aby otrzymywać powiadomienia, że usługa modemu działa w tle.
-                \n7. Odczyt stanu telefonu: aby odłączyć interfejs Bluetooth podczas odbierania połączenia telefonicznego. Przepisy telekomunikacyjne zabraniają podłączania osoby do sieci telefonicznej bez ostrzeżenia.
-                \n\nJeśli wcześniej odmówiłeś ważnych dla aplikacji uprawnień, musisz wrócić do ustawień urządzenia i ponownie nadać właściwe uprawnienia."</string>
     <string name="txt_PleaseUseMenuExit">Wciśnij Menu, później Wyjście by zamknąć program</string>
     <string name="txt_PleaseWaitTxing">Czekaj...Ciągle Wysyłam Wiadmomość(s)</string>
     <string name="txt_Preferences">Preferencje</string>

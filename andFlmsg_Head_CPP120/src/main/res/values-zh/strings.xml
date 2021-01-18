@@ -37,7 +37,6 @@
     <string name="bt_SpeedColor">速率/颜色</string>
     <string name="bt_SqlchDown">静噪 降</string>
     <string name="bt_SqlchUp">静噪 升</string>
-    <string name="bt_StopTx">停止发射</string>
     <string name="bt_Templates">模板</string>
     <string name="bt_ToOutbox">到发件箱</string>
     <string name="bt_TransferFormOnly">仅限Tfer表格</string>
@@ -195,9 +194,6 @@
     <string name="txt_Ok">好</string>
     <string name="txt_OutboxView">
 发件箱界面\n\n 长按消息以选择和发送
-</string>
-    <string name="txt_PermissionsExplained">
-"您将看到一系列权限请求。\n所有权限对于使此应用程序按预期工作至关重要。 \n如果您阻止任何权限，该应用将无法运行，并且将退出。 \n\n权限说明：\n1.访问精确位置：当不在蜂窝位置时，GPS用于显示准确的时间。 \n2.蓝牙和蓝牙管理：通过蓝牙设备发送和接收调制解调器音频。\n3.写入外部存储：访问SD卡上的应用目录（内部或外部）以存储消息和图像。\n4. 录制音频并修改音频设置：要从内部或外部麦克风捕获音频并调整设置。\n5. 互联网：用于显示和接收Flmsg使用的HTML表单中的数据。 \n6. 广播粘性：具有粘性通知，以便调制解调器服务在后台继续运行。\n7.读取电话状态：在接听电话时断开蓝牙接口。 电信法规通常禁止在没有警告的情况下将人连接到电话网络。\n\n如果您之前拒绝了某些关键权限，则必须返回到设备的设置/应用并重新允许缺少的权限"
 </string>
     <string name="txt_PleaseUseMenuExit">
 请使用菜单，然后使用退出选项关闭AndFlmsg

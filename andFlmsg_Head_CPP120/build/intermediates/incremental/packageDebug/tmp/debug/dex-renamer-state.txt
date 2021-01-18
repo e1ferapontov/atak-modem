@@ -1,4 +1,0 @@
-#Mon Jan 18 13:14:15 MSK 2021
-base.0=/Users/fm/Downloads/andflmsg_BitBucket/andFlmsg_Head_CPP120/build/intermediates/dex/debug/mergeDexDebug/out
-path.0=classes.dex
-renamed.0=classes.dex

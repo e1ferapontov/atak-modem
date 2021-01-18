@@ -68,22 +68,6 @@ extern bool getNewAmplReady() {
 return true;
 }
 
-//Update the waterfall array of amplitudes in Java class Modem
-extern void updateWaterfallBuffer(double *aFFTAmpl) {
-	//Find Java Modem class
-	jclass cls = gEnv->FindClass("com/AndFlmsg/Modem");
-	//Find Static Java method updateWaterfall (argument is an array of double and returns Void)
-	jmethodID mid = gEnv->GetStaticMethodID(cls, "updateWaterfall", "([D)V");
-	//Create a Java array and copy the C++ array into it
-	jdoubleArray jaFFTAmpl = gEnv->NewDoubleArray(RSID_FFT_SIZE);
-	gEnv->SetDoubleArrayRegion(jaFFTAmpl, 0, RSID_FFT_SIZE, aFFTAmpl);
-	//Call the method with the Java array
-	gEnv->CallStaticVoidMethod(cls, mid, jaFFTAmpl);
-	//Release the intermediate array.
-	gEnv->DeleteLocalRef(jaFFTAmpl);
-}
-
-
 //Access to Java config class methods for accessing String preferences
 extern string getPreferenceS(string preferenceString, string defaultValue) {
 

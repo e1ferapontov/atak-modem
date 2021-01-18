@@ -201,7 +201,6 @@ public class AndFlmsg extends AppCompatActivity {
     private static ScrollView myTermSC;
     private static TextView myModemTV;
     private static ScrollView myModemSC;
-    private static waterfallView myWFView;
 
     public static View pwLayout;
 
@@ -318,16 +317,6 @@ public class AndFlmsg extends AppCompatActivity {
 
     // Listener for changes in preferences
     public static OnSharedPreferenceChangeListener splistener;
-
-    // Create runnable for updating the waterfall display
-    public static final Runnable updatewaterfall = new Runnable() {
-        public void run() {
-            if (myWFView != null) {
-                // myWFView.invalidate();
-                myWFView.postInvalidate();
-            }
-        }
-    };
 
     // Create runnable for changing the main window's title
     public static final Runnable updatetitle = new Runnable() {
@@ -724,15 +713,7 @@ public class AndFlmsg extends AppCompatActivity {
 
     //Request permission from the user
     private void requestAllCriticalPermissions() {
-        AlertDialog.Builder myAlertDialog = new AlertDialog.Builder(AndFlmsg.this);
-        myAlertDialog.setMessage(getString(R.string.txt_PermissionsExplained));
-        myAlertDialog.setCancelable(false);
-        myAlertDialog.setPositiveButton(getString(R.string.bt_Continue), new DialogInterface.OnClickListener() {
-            public void onClick(DialogInterface dialog, int id) {
-                ActivityCompat.requestPermissions(myInstance, permissionList, REQUEST_PERMISSIONS);
-            }
-        });
-        myAlertDialog.show();
+        ActivityCompat.requestPermissions(myInstance, permissionList, REQUEST_PERMISSIONS);
     }
 
 
@@ -1884,9 +1865,6 @@ public class AndFlmsg extends AppCompatActivity {
                     }
                 });
                 myAlertDialog.show();
-                break;
-            case R.id.About:
-                displayAbout();
                 break;
         }
         return true;
@@ -4424,20 +4402,10 @@ public class AndFlmsg extends AppCompatActivity {
         //Ensure we reset the swipe action
         AndFlmsg.inFormDisplay = false;
 
-        if (withWaterfall) {
-            currentview = MODEMVIEWwithWF;
-            setContentView(R.layout.modemwithwf);
-            screenAnimation((ViewGroup) findViewById(R.id.modemwwfscreen),
-                    screenAnimation);
-            // Get the waterfall view object for the runnable
-            myWFView = (waterfallView) findViewById(R.id.WFbox);
-        } else {
-            currentview = MODEMVIEWnoWF;
-            setContentView(R.layout.modemwithoutwf);
-            screenAnimation((ViewGroup) findViewById(R.id.modemnwfscreen),
-                    screenAnimation);
-            myWFView = null;
-        }
+        currentview = MODEMVIEWnoWF;
+        setContentView(R.layout.modemwithoutwf);
+        screenAnimation((ViewGroup) findViewById(R.id.modemnwfscreen),
+                screenAnimation);
 
         myModemTV = (TextView) findViewById(R.id.modemview);
         myModemTV.setHorizontallyScrolling(false);
@@ -4462,60 +4430,6 @@ public class AndFlmsg extends AppCompatActivity {
 
         // Advise user of which screen we are in
         middleToastText(getString(R.string.txt_ModemScreen));
-
-        if (withWaterfall) { // initialise two extra buttons
-
-            // JD Initialize the Waterfall Sensitivity UP button
-            myButton = (Button) findViewById(R.id.button_wfsensup);
-            myButton.setOnClickListener(new OnClickListener() {
-                public void onClick(View v) {
-                    try {
-                        if (myWFView != null) {
-                            myWFView.maxvalue /= 1.25;
-                            if (myWFView.maxvalue < 1)
-                                myWFView.maxvalue = 1.0;
-                            // store value into preferences
-                            SharedPreferences.Editor editor = AndFlmsg.mysp
-                                    .edit();
-                            editor.putFloat("WFMAXVALUE",
-                                    (float) myWFView.maxvalue);
-                            // Commit the edits!
-                            editor.commit();
-                        }
-                    }
-                    // JD fix this catch action
-                    catch (Exception ex) {
-                        loggingclass.writelog("Button Execution error: " + ex.getMessage(), null, true);
-                    }
-                }
-            });
-
-            // JD Initialize the Waterfall Sensitivity DOWN button
-            myButton = (Button) findViewById(R.id.button_wfsensdown);
-            myButton.setOnClickListener(new OnClickListener() {
-                public void onClick(View v) {
-                    try {
-                        if (myWFView != null) {
-                            myWFView.maxvalue *= 1.25;
-                            if (myWFView.maxvalue > 40)
-                                myWFView.maxvalue = 40.0;
-                            // store value into preferences
-                            SharedPreferences.Editor editor = AndFlmsg.mysp
-                                    .edit();
-                            editor.putFloat("WFMAXVALUE",
-                                    (float) myWFView.maxvalue);
-                            // Commit the edits!
-                            editor.commit();
-                        }
-                    }
-                    // JD fix this catch action
-                    catch (Exception ex) {
-                        loggingclass.writelog("Button Execution error: " + ex.getMessage(), null, true);
-                    }
-                }
-            });
-
-        }
 
         // Initialize the RxRSID check box
         checkbox = (CheckBox) findViewById(R.id.rxrsid);
@@ -4701,62 +4615,6 @@ public class AndFlmsg extends AppCompatActivity {
             }
         });
 
-        // JD Initialize the WATERFALL ON/OFF button
-        myButton = (Button) findViewById(R.id.button_waterfallONOFF);
-        setTextSize(myButton);
-        myButton.setOnClickListener(new OnClickListener() {
-            public void onClick(View v) {
-                try {
-                    if (currentview == MODEMVIEWnoWF) {
-                        displayModem(NORMAL, true);
-                    } else {
-                        displayModem(NORMAL, false);
-                    }
-                }
-                // JD fix this catch action
-                catch (Exception ex) {
-                    loggingclass.writelog("Button Execution error: " + ex.getMessage(), null, true);
-                }
-            }
-        });
-
-        // JD Initialize the STOP TX button
-        myButton = (Button) findViewById(R.id.button_stopTX);
-        setTextSize(myButton);
-        myButton.setOnClickListener(new OnClickListener() {
-            public void onClick(View v) {
-                try {
-                    if (Processor.TXActive) {
-                        Modem.stopTX = true;
-                    }
-                }
-                // JD fix this catch action
-                catch (Exception ex) {
-                    loggingclass.writelog("Button Execution error: " + ex.getMessage(), null, true);
-                }
-            }
-        });
-
-    }
-
-    // Display the About screen
-    private void displayAbout() {
-        currentview = ABOUTVIEW;
-
-        // Open APRS layout by default until we have other activities defined
-        setContentView(R.layout.about);
-        TextView myversion = (TextView) findViewById(R.id.versiontextview);
-        myversion.setText("          " + Processor.version);
-
-        // JD Initialize the return to terminal button
-        myButton = (Button) findViewById(R.id.button_returntoterminal);
-        setTextSize(myButton);
-        myButton.setOnClickListener(new OnClickListener() {
-            public void onClick(View v) {
-                displayTerminal(BOTTOM);
-            }
-        });
-
     }
 
 
@@ -4817,54 +4675,5 @@ public class AndFlmsg extends AppCompatActivity {
 
     }
 
-
-    //Display Picture popup window
-    public void txPicturePopup(int picW, int picH) {
-        // LayoutInflater for popup windows
-        LayoutInflater inflater = (LayoutInflater) this
-                .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-        pwLayout = inflater.inflate(R.layout.txpicturepopup,
-                (ViewGroup) findViewById(R.id.html_popup));
-        Display display = ((WindowManager) getSystemService(WINDOW_SERVICE)).getDefaultDisplay();
-        /* Now we can retrieve all display-related infos */
-        int winWidth = display.getWidth();
-        int winHeight = display.getHeight();
-        // int orientation = display.getOrientation();
-        // create a large PopupWindow (it will be clipped automatically if larger than main window)
-        final PopupWindow pw = new PopupWindow(pwLayout, winWidth, winHeight, true);
-        pw.setBackgroundDrawable(new BitmapDrawable()); // to
-        // allow click event to be active, display the popup in the center
-        pw.showAtLocation(pwLayout, Gravity.TOP, 0, 0);
-        ImageView imageView = (ImageView) AndFlmsg.pwLayout.findViewById(R.id.imageView1);
-        //TextView emailText = (TextView) layout.findViewById(R.id.emailtext);
-        //mWebView = (WebView) layout.findViewById(R.id.imageView1);
-        // Return button init
-        myButton = (Button) pwLayout.findViewById(R.id.button_close);
-        setTextSize(myButton);
-        myButton.setOnClickListener(new OnClickListener() {
-            public void onClick(View v) {
-                pw.dismiss();
-            }
-        });
-        // Return button init
-        myButton = (Button) pwLayout.findViewById(R.id.button_close);
-        setTextSize(myButton);
-        myButton.setOnClickListener(new OnClickListener() {
-            public void onClick(View v) {
-                pw.dismiss();
-            }
-        });
-        // Return button init
-        myButton = (Button) pwLayout.findViewById(R.id.button_close);
-        setTextSize(myButton);
-        myButton.setOnClickListener(new OnClickListener() {
-            public void onClick(View v) {
-                pw.dismiss();
-            }
-        });
-
-        //imageView.scrollBy(x, y);
-
-    }
 
 } // end of AndFlmsg class

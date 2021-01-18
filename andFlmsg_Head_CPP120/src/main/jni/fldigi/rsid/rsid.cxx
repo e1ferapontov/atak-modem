@@ -381,8 +381,6 @@ if (progdefaults.rsidWideSearch) {
 	if (!newAmplReady) {
 		if (fftCounter > 1) { //Once every two FFTs since we have a new FFT for every half period
 			fftCounter = 0;
-			//Use by Modem_interface code
-			updateWaterfallBuffer(aFFTAmpl);
 		} else fftCounter++;
 	}
 

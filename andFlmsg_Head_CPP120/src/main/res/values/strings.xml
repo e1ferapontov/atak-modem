@@ -37,7 +37,6 @@
     <string name="bt_SpeedColor">Speed/Color</string>
     <string name="bt_SqlchDown">Sqlch Down</string>
     <string name="bt_SqlchUp">Sqlch   Up</string>
-    <string name="bt_StopTx">Stop Tx</string>
     <string name="bt_Templates">Templates</string>
     <string name="bt_ToOutbox">To Outbox</string>
     <string name="bt_TransferFormOnly">Tfer Form Only</string>
@@ -170,18 +169,6 @@
     <string name="txt_NotInMiddleOfMessage">Not while in the middle of receiving a message</string>
     <string name="txt_Ok">Ok</string>
     <string name="txt_OutboxView">Outbox View\n\n Long Press on a Message to Select and Send</string>
-    <string name="txt_PermissionsExplained">"You are about to be presented with a series of permission requests.
-                \nAll permissions are essential to make this app work as intended.
-                \nIf you block any of the permissions the app cannot run and will exit.
-                \n\nExplanations for the permissions:
-                \n1. Access Fine Location: The GPS is used for showing accurate time when not in a cellular location.
-                \n2. Bluetooth and Bluethooth Admin: To send and receive the modem audio via a Bluetooth device.
-                \n3. Write External Storage: access to the app's directory on the SD card (internal or external) for storing messages and images.
-                \n4. Record Audio and Modify Audio Settings: To capture the audio from the internal or external microphone and adjust the settings.
-                \n5. Internet: for displaying and receiving data from the HTML forms used by Flmsg.
-                \n6. Broadcast Sticky: to have sticky notifications so that the modem service is kept going in the background.
-                \n7. Read Phone State: to disconnect the Bluetooth interface when receiving a phone call. Telecommunication regulations generally forbid connecting a person to the telephone network or to do so without a warning.
-                \n\nIf you have previously denied some critical permissions, you will have to go back to the Device's Settings/Apps and re-allow the missing permission."</string>
     <string name="txt_PleaseUseMenuExit">Please Use the Menu then the Exit option to close AndFlmsg</string>
     <string name="txt_PleaseWaitTxing">Please Wait...Still Transmitting Message(s)</string>
     <string name="txt_Preferences">Preferences</string>

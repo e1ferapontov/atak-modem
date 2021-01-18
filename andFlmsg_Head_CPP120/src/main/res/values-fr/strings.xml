@@ -37,7 +37,6 @@
     <string name="bt_SpeedColor">Vitesse/Couleur</string>
     <string name="bt_SqlchDown">Sqlch -</string>
     <string name="bt_SqlchUp">Sqlch +</string>
-    <string name="bt_StopTx">Stop Trans.</string>
     <string name="bt_Templates">Modèles</string>
     <string name="bt_ToOutbox">à Envoyer</string>
     <string name="bt_TransferFormOnly">Envoi Formulaire</string>
@@ -170,18 +169,6 @@
     <string name="txt_NotInMiddleOfMessage">Pas Pendant la Réception d\'un Message</string>
     <string name="txt_Ok">Ok</string>
     <string name="txt_OutboxView">Ecran \"A Envoyer\" \n\nPression Longue sur Message pour Ouvrir</string>
-    <string name="txt_PermissionsExplained">"Vous allez être présentés avec une série de demandes d'autorisations.
-                \nToutes les autorisations sont essentielles pour le fonctionnement de cette application.
-                \nSi vous deniez toute autorisations, l'application ne peut tourner comme requis et s'arrêtera.
-                \n\nExplications pour les autorisations:
-                \n1. Accès a la Position: Le GPS est utilisé pour afficher une heure exacte quand il n'y a pas de reseau cellulaire.
-                \n2. Bluetooth: pour recevoir et envoyer l'audio du Modem par un dispositif Bluetooth.
-                \n3. Accès aux Fichiers sur l'appareil: accéder au fichiers de l'application sur la carte SD (intérieure ou extérieure) pour sauvegarder les messages et les images.
-                \n4. Enregistrer des Fichiers Audio: pour capturer le son du microphone interne ou externe et adjuster le volume.
-                \n5. Internet: pour afficher et recueillir les données des formulaires HTML utilisés par Flmsg.
-                \n6. Broadcast Sticky: pour maintenir le modem en tache de fond.
-                \n7. Gerer les Appels Téléphoniques: pour déconnecter le Bluetooth lors de la réception d'un appel téléphonique. La reglementation Radio Amateur normallement interdit la connection d'un QSO au reseau telephonique.
-                \n\nSi vous avez denier une autorisations critique, retourner au parametres Application et rétablir toutes les autorisations manquantes pour cette application."</string>
     <string name="txt_PleaseUseMenuExit">S\'il Vous Plait Utiliser la Fonction Quitter dans le Menu</string>
     <string name="txt_PleaseWaitTxing">Patientez...En cours de transmission de Message(s)</string>
     <string name="txt_Preferences">Préférences</string>

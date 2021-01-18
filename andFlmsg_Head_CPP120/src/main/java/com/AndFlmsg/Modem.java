@@ -35,8 +35,6 @@ import android.provider.MediaStore;
 import android.provider.MediaStore.Images;
 import android.util.Base64;
 import android.widget.Button;
-import android.widget.EditText;
-
 
 public class Modem {
 
@@ -57,25 +55,16 @@ public class Modem {
     private static int bufferSize = 0;
     private final static float sampleRate = 8000.0f;
 
-    //Must match the rsid.h declaration: #define RSID_FFT_SIZE		1024
-    public static final int RSID_FFT_SIZE = 1024;
-    //Must match the rsid.h declaration: #define RSID_SAMPLE_RATE 11025.0
-    public final static double RSID_SAMPLE_RATE = 11025.0f;
-
     private static boolean FirstBracketReceived = false;
     public static String MonitorString = "";
     public static boolean WrapLF = false;
     private static String BlockString = "";
     private static long lastCharacterTime = 0;
-    //	private static SampleRateConversion myResampler;
 
     public static double frequency = 1500.0;
-    public static double rsidFrequency = 0;
     static double squelch = 20.0;
     static double metric = 50; //midrange
 
-    //Waterfall interaction
-    public static double[] WaterfallAmpl = new double[RSID_FFT_SIZE];
     //Semaphore for waterfall (new array of amplitudes needed for display)
     //Is now also accessed from the c++ native side in rsid.cxx
     public static boolean newAmplReady = false;
@@ -111,7 +100,7 @@ public class Modem {
     private static boolean CModemInitialized = false;
 
     //Mfsk picture
-    public static int picBuffer[];
+    public static int[] picBuffer;
     private static int pixelNumber;
     public static Bitmap picBitmap = null;
     public static int mfskPicHeight = 0;
@@ -122,8 +111,6 @@ public class Modem {
 
     //Declaration of native classes
     private native static String createCModem(int modemCode);
-
-    private native static void changeCModem(int modemCode, double newFrequency);
 
     private native static String initCModem(double frequency);
 
@@ -157,10 +144,6 @@ public class Modem {
 
     private native static void setSlowCpuFlag(boolean slowcpu);
 
-    private native static void txPicture(byte[] txPictureBuffer, int txPictureWidth,
-                                         int txPictureHeight, int txPictureTxSpeed,
-                                         int txPictureColour);
-
 
     static {
         //Load the C++ modems library
@@ -193,14 +176,6 @@ public class Modem {
     public static void putEchoChar(int txedChar) {
         Processor.monitor += (char) txedChar;
         AndFlmsg.mHandler.post(AndFlmsg.addtomodem);
-    }
-
-
-    //Called from the C++ native side in rsid.cxx
-    public static void updateWaterfall(double[] aFFTAmpl) {
-        System.arraycopy(aFFTAmpl, 0, WaterfallAmpl, 0, RSID_FFT_SIZE);
-        Modem.newAmplReady = true;
-        AndFlmsg.mHandler.post(AndFlmsg.updatewaterfall);
     }
 
 
@@ -1052,7 +1027,6 @@ public class Modem {
                         //Set flags to TXing
                         Processor.TXActive = true;
                         Processor.Status = AndFlmsg.myContext.getString(R.string.txt_Transmitting);
-                        AndFlmsg.mHandler.post(AndFlmsg.updatetitle);
                         //Stop the modem receiving side
                         pauseRxModem();
 
@@ -1098,56 +1072,6 @@ public class Modem {
                         //Save current mode in case we change it for images Tx
                         //int currentMode = Processor.RxModem;
                         //Is there a picture/signature to send after the text?
-                        if (txNumberOfImagesToTx > 0) {
-                            //Change to the selected MFSK mode
-                            int modemCode = Modem.getMode("MFSK32");
-                            if (!txPictureTxMode.equals("")) {
-                                modemCode = Modem.getMode(txPictureTxMode);
-                            }
-                            //Change to MFSK Image modem
-//			    Modem.createCModem(modemCode);
-//			    Modem.initCModem(frequency);
-                            //changeCModem(modemCode, frequency);
-                            TxMFSKPicture picModem = new TxMFSKPicture(modemCode);
-                            //PictureTxRSID picRSIDTx = new PictureTxRSID();
-                            //debugging only
-                            //Message.addEntryToLog(Message.dateTimeStamp() + "Done 'changeCModem' with modem # " + modemCode);
-                            for (int i = 0; i < txNumberOfImagesToTx; i++) {
-                                if (Message.attachedPictureArray[i] != null &&
-                                        Message.attachedPictureWidth[i] > 0 &&
-                                        Message.attachedPictureHeight[i] > 0) {
-                                    //Modem.txInit(frequency);
-                                    //debugging only
-                                    //Message.addEntryToLog(Message.dateTimeStamp() + "Done 'txInit' at frequency: " + frequency);
-                                    //Always send RSID
-                                    //Bug found by Stan KG5CKK. Thanks Stan.
-                                    // String modemName = Modem.modemCapListString[getModeIndex(modemCode)];
-                                    String modemName = Modem.customModeListString[getModeIndex(modemCode)];
-                                    PictureTxRSID.send(modemName);
-                                    //debugging only
-                                    //Message.addEntryToLog(Message.dateTimeStamp() + "Done 'txRSID' ");
-                                    //Send picture
-                                    picModem.txImageProcess("", Message.attachedPictureArray[i],
-                                            Message.attachedPictureWidth[i], Message.attachedPictureHeight[i],
-                                            txPictureTxSpeed, txPictureColour);
-                                    //Modem.txPicture(Message.attachedPictureArray[i], Message.attachedPictureWidth[i],
-                                    //	    Message.attachedPictureHeight[i], txPictureTxSpeed, txPictureColour);
-                                    //debugging only
-                                    //Message.addEntryToLog(Message.dateTimeStamp() + "Done 'txPicture' ");
-                                    //Release the (large) Byte array for GC
-                                    Message.attachedPictureArray[i] = null;
-                                    //debugging only
-                                    //Message.addEntryToLog(Message.dateTimeStamp() + "Done 'release array' ");
-                                }
-                            }
-                            //Change back to the previous mode (for post-Tx-RSID purposes)
-                            //Message.addEntryToLog(Message.dateTimeStamp() + "About to execute 'changeCModem' with modem # " + currentMode);
-                            //Modem.createCModem(currentMode);
-                            //Modem.initCModem(frequency);
-                            //changeCModem(currentMode, frequency);
-                            //debugging only
-                            //Message.addEntryToLog(Message.dateTimeStamp() + "Done 'changeCModem' with modem # " + currentMode);
-                        }
                         //Send TX RSID if required
                         //Check and send post-transmission RSID
                         if (txRsidOn && config.getPreferenceB("TXPOSTRSID", false)) {
@@ -1214,8 +1138,6 @@ public class Modem {
             }
         }
     }
-
-    ;
 
 
     //Send Tune in a separate thread so that the UI thread is not blocked

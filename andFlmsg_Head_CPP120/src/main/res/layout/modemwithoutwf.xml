@@ -2,8 +2,8 @@
 
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
 	android:layout_width="fill_parent"
-	android:layout_height="fill_parent" 
-	android:weightSum="1" 
+	android:layout_height="fill_parent"
+	android:weightSum="1"
 	android:orientation="vertical"
 	android:id="@+id/modemnwfscreen" >
 	<LinearLayout
@@ -52,7 +52,7 @@
     </LinearLayout>
 	<ScrollView android:id="@+id/modemscrollview"
 		android:layout_width="fill_parent"
-		android:layout_height="0dp" 
+		android:layout_height="0dp"
 		android:layout_weight="0.93">
 		<TextView android:id="@+id/modemview"
 		    android:text="@string/txt_ModemScreen"
@@ -89,61 +89,49 @@
 	<LinearLayout android:id="@+id/FrameLayout3"
 		android:layout_width="fill_parent"
 		android:layout_height="47dp"
-		android:weightSum="1" 
+		android:weightSum="1"
 		android:layout_weight="0.03">
-		<Button android:id="@+id/button_modeUP" 
+		<Button android:id="@+id/button_modeUP"
 			android:text="@string/bt_NextMode"
-			android:layout_height="fill_parent" 
-			android:layout_weight="0.25" 
+			android:layout_height="fill_parent"
+			android:layout_weight="0.25"
 			android:layout_width="0dp">
 		</Button>
-		<Button android:id="@+id/button_squelchUP" 
+		<Button android:id="@+id/button_squelchUP"
 			android:text="@string/bt_SqlchUp"
-			android:layout_height="fill_parent" 
-			android:layout_weight="0.25" 
+			android:layout_height="fill_parent"
+			android:layout_weight="0.25"
 			android:layout_width="0dp">
 		</Button>
-		<Button android:id="@+id/button_modemONOFF" 
+		<Button android:id="@+id/button_modemONOFF"
 			android:text="@string/bt_ModemOnOff"
-			android:layout_height="fill_parent" 
-			android:layout_width="0dp" 
-			android:layout_weight="0.25">
-		</Button>
-		<Button android:id="@+id/button_stopTX" 
-			android:text="@string/bt_StopTx"
-			android:layout_height="fill_parent" 
-			android:layout_width="0dp" 
+			android:layout_height="fill_parent"
+			android:layout_width="0dp"
 			android:layout_weight="0.25">
 		</Button>
 	</LinearLayout>
 	<LinearLayout android:id="@+id/FrameLayout4"
 		android:layout_width="fill_parent"
 		android:layout_height="47dp"
-		android:layout_weight="0.03" 
+		android:layout_weight="0.03"
 		android:weightSum="1">
-		<Button android:id="@+id/button_modeDOWN" 
+		<Button android:id="@+id/button_modeDOWN"
 			android:text="@string/bt_PrevMode"
-			android:layout_height="fill_parent" 
-			android:layout_weight="0.25" 
+			android:layout_height="fill_parent"
+			android:layout_weight="0.25"
 			android:layout_width="0dp">
 		</Button>
-		<Button android:id="@+id/button_squelchDOWN" 
+		<Button android:id="@+id/button_squelchDOWN"
 			android:text="@string/bt_SqlchDown"
-			android:layout_height="fill_parent" 
-			android:layout_weight="0.25" 
-			android:layout_width="0dp">	
+			android:layout_height="fill_parent"
+			android:layout_weight="0.25"
+			android:layout_width="0dp">
 		</Button>
-		<Button android:id="@+id/button_tune" 
+		<Button android:id="@+id/button_tune"
 			android:text="@string/bt_Tune"
 			android:layout_height="fill_parent"
-			android:layout_width="0dp" 
+			android:layout_width="0dp"
 			android:layout_weight="0.25">
-		</Button>
-		<Button android:id="@+id/button_waterfallONOFF" 
-			android:text="@string/bt_WFallOnOff"
-			android:layout_width="0dp" 
-			android:layout_weight="0.25" 
-			android:layout_height="fill_parent">
 		</Button>
 	</LinearLayout>
 </LinearLayout>

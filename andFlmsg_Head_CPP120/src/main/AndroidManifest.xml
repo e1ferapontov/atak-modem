@@ -37,8 +37,6 @@
 
         <service android:name=".Processor" />
 
-        <activity android:name=".imagePicker" />
-
         <provider
             android:name=".myFileProvider"
             android:authorities="${applicationId}.provider"
