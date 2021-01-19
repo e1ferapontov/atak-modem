@@ -460,9 +460,6 @@ public class AndFlmsg extends AppCompatActivity {
         Modem.txRsidOn = config.getPreferenceB("TXRSID", false);
         Modem.rxRsidOn = config.getPreferenceB("RXRSID", false);
 
-        System.out.println("RXRSID: " + Modem.rxRsidOn);
-        System.out.println("TXRSID: " + Modem.txRsidOn);
-
         //Update the list of available modems
         Modem.updateModemCapabilityList();
 
@@ -842,18 +839,18 @@ public class AndFlmsg extends AppCompatActivity {
         myButton.setOnClickListener(new OnClickListener() {
             public void onClick(View v) {
                 try {
-                    if (!Processor.ReceivingForm && ProcessorON
-                            && !Processor.TXActive
-                            && Modem.modemState == Modem.RXMODEMRUNNING) {
-                        Processor.TxModem = Processor.RxModem = Modem
-                                .getModeUpDown(Processor.RxModem, +1);
+                    if (!Processor.ReceivingForm && ProcessorON && !Processor.TXActive && Modem.modemState == Modem.RXMODEMRUNNING) {
+                        Processor.TxModem = Processor.RxModem = Modem.getModeUpDown(Processor.RxModem, +1);
                         Modem.changemode(Processor.RxModem); // to make the changes effective
                         saveLastModeUsed(Processor.RxModem);
+
+                        int mIndex = Modem.getModeIndexFullList(Processor.RxModem);
+                        loggingclass.writelog("Current mode: " + Modem.modemCapListString[mIndex], null);
                     }
                 }
                 // JD fix this catch action
                 catch (Exception ex) {
-                    loggingclass.writelog("Button Execution error: " + ex.getMessage(), null, true);
+                    loggingclass.writelog("Button Execution error: " + ex.getMessage(), null);
                 }
             }
         });
@@ -864,18 +861,18 @@ public class AndFlmsg extends AppCompatActivity {
         myButton.setOnClickListener(new OnClickListener() {
             public void onClick(View v) {
                 try {
-                    if (!Processor.ReceivingForm && ProcessorON
-                            && !Processor.TXActive
-                            && Modem.modemState == Modem.RXMODEMRUNNING) {
-                        Processor.TxModem = Processor.RxModem = Modem
-                                .getModeUpDown(Processor.RxModem, -1);
+                    if (!Processor.ReceivingForm && ProcessorON && !Processor.TXActive && Modem.modemState == Modem.RXMODEMRUNNING) {
+                        Processor.TxModem = Processor.RxModem = Modem.getModeUpDown(Processor.RxModem, -1);
                         Modem.changemode(Processor.RxModem); // to make the changes effective
                         saveLastModeUsed(Processor.RxModem);
+
+                        int mIndex = Modem.getModeIndexFullList(Processor.RxModem);
+                        loggingclass.writelog("Current mode: " + Modem.modemCapListString[mIndex], null);
                     }
                 }
                 // JD fix this catch action
                 catch (Exception ex) {
-                    loggingclass.writelog("Button Execution error: " + ex.getMessage(), null, true);
+                    loggingclass.writelog("Button Execution error: " + ex.getMessage(), null);
                 }
             }
         });

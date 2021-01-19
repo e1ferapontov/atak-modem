@@ -33,50 +33,44 @@ public class Modem {
     public static final int RXMODEMRUNNING = 2;
     public static final int RXMODEMPAUSED = 3;
     public static final int RXMODEMSTOPPING = 4;
-
-    public static int modemState = RXMODEMIDLE;
-
-    public static boolean modemThreadOn = true;
-
-    public static int NumberOfOverruns = 0;
-    private static AudioRecord audiorecorder = null;
-    private static boolean RxON = false;
-    private static int bufferSize = 0;
+    //The following value MUST Match the MAXMODES in modem.h
+    public static final int MAXMODES = 300;
     private final static float sampleRate = 8000.0f;
-
-    private static boolean FirstBracketReceived = false;
+    public static int modemState = RXMODEMIDLE;
+    public static boolean modemThreadOn = true;
+    public static int NumberOfOverruns = 0;
     public static String MonitorString = "";
-    private static String BlockString = "";
-    private static long lastCharacterTime = 0;
-
     public static double frequency = 1500.0;
-    static double squelch = 20.0;
-    static double metric = 50; //midrange
-
     //Semaphore for waterfall (new array of amplitudes needed for display)
     //Is now also accessed from the c++ native side in rsid.cxx
     public static boolean newAmplReady = false;
-
     public static boolean stopTX = false;
-
-    //The following value MUST Match the MAXMODES in modem.h
-    public static final int MAXMODES = 300;
     //List of modems and modes returned from the C++ modems
     public static int[] modemCapListInt = new int[MAXMODES];
     public static String[] modemCapListString = new String[MAXMODES];
     public static int numModes = 0;
-    //Custom list of modes as slected in the preferences (can include all modes above if 
+    //Custom list of modes as slected in the preferences (can include all modes above if
     //  "Custom List" is not selected, or alternatively all modes manually selected in preferences)
     public static int[] customModeListInt = new int[MAXMODES];
     public static String[] customModeListString = new String[MAXMODES];
     public static int customNumModes = 0;
-
     //Tx variables
     public static AudioTrack txAt = null;
-
     //RSID Flags
     public static boolean rxRsidOn;
     public static boolean txRsidOn;
+    static double squelch = 20.0;
+    static double metric = 50; //midrange
+    private static AudioRecord audiorecorder = null;
+    private static boolean RxON = false;
+    private static int bufferSize = 0;
+    private static boolean FirstBracketReceived = false;
+    private static String BlockString = "";
+
+    static {
+        System.loadLibrary("c++_shared");
+        System.loadLibrary("AndFlmsg_Modem_Interface");
+    }
 
     //Declaration of native classes
     private native static String createCModem(int modemCode);
@@ -109,22 +103,13 @@ public class Modem {
 
     private native static void setSlowCpuFlag(boolean slowcpu);
 
-
-    static {
-        //Load the C++ modems library
-        //System.loadLibrary("stlport_shared");
-        System.loadLibrary("c++_shared");
-        System.loadLibrary("AndFlmsg_Modem_Interface");
-    }
-
-
     //Called from the C++ side to modulate the audio output
     public static void txModulate(double[] outDBuffer, int length) {
         int res = 0;
         //Catch the stopTX flag at this point as well
         if (!Modem.stopTX) {
             short[] outSBuffer = new short[length];
-            int volumebits = Integer.parseInt(config.getPreferenceS("VOLUME", "8"));
+            int volumebits = Integer.parseInt(config.getPreferenceS("VOLUME", "10"));
             //Change format and re-scale for Android
             //To be moved to c++ code for speed
             for (int i = 0; i < length; i++) {
@@ -132,7 +117,7 @@ public class Modem {
             }
             res = txAt.write(outSBuffer, 0, length);
             if (res < 0)
-                loggingclass.writelog("Error in writing sound buffer: " + res, null, true);
+                loggingclass.writelog("Error in writing sound buffer: " + res, null);
         }
     }
 
@@ -249,7 +234,7 @@ public class Modem {
                 ii = 0;//ok done
             } else {
                 if (ii < 16) { //Only if have to wait more than 1 seconds
-                    loggingclass.writelog("Waiting for Audio MIC availability...", null, true);
+                    loggingclass.writelog("Waiting for Audio MIC availability...", null);
                 }
                 try {
                     Thread.sleep(250);//1/4 second
@@ -261,7 +246,7 @@ public class Modem {
         }
         if (audiorecorder.getState() != AudioRecord.STATE_INITIALIZED) {
             //Android add exception catch here
-            loggingclass.writelog("Can't open Audio MIC \n", null, true);
+            loggingclass.writelog("Can't open Audio MIC \n", null);
         }
     }
 
@@ -433,7 +418,6 @@ public class Modem {
         squelch = AndFlmsg.mysp.getFloat("SQUELCHVALUE", (float) 20.0);
     }
 
-
     /**
      * @param squelchdiff the delta to add to squelch
      */
@@ -449,10 +433,6 @@ public class Modem {
     }
 
     public static void processRxChar(char inChar) {
-
-        //Save the time of the last character received
-        lastCharacterTime = System.currentTimeMillis();
-
         //For UTF-8 let all characters through
         //if (inChar > 127) {
         // todo: unicode encoding
@@ -512,23 +492,6 @@ public class Modem {
             MonitorString += inChar;
         }
     }
-
-
-    //Called every second to check is we have a message reception timeout (This parameter 
-    //   is called "Extract Timeout" in Fldigi/NBEMS configuration)
-    public static void checkExtractTimeout() {
-        int timeout = config.getPreferenceI("EXTRACTTIMEOUT", 4);
-        if (Processor.ReceivingForm) {
-            if (lastCharacterTime + (timeout * 1000) < System.currentTimeMillis()) {
-                Processor.CrcString = "";
-                Processor.FileNameString = "";
-                Processor.ReceivingForm = false;
-                FirstBracketReceived = false;
-                Processor.PostToTerminal(AndFlmsg.myContext.getString(R.string.txt_MsgRxTimeout));
-            }
-        }
-    }
-
 
     //In a separate thread so that the UI thread is not blocked during TX
     public static void txData(String sendingFolder, String sendingFileName, String Sendline,
@@ -604,7 +567,7 @@ public class Modem {
                         //Changed for Utf-8 variable length codes
                         byte[] bytesToSend = null;
                         try {
-                            bytesToSend = txSendline.getBytes("UTF-8");
+                            bytesToSend = txSendline.getBytes("UTF_8");
                         } catch (Exception e) { //Invalid UTF-8 characters
                             bytesToSend[0] = 0;//Null character
                         }
@@ -618,8 +581,7 @@ public class Modem {
                             try {
                                 Thread.sleep(50);
                             } catch (InterruptedException e) {
-                                // TODO Auto-generated catch block
-                                //e.printStackTrace();
+                                e.printStackTrace();
                             }
                         }
                         //Android debug add a fixed delay to avoid cutting off the tail end of the modulation
@@ -629,11 +591,11 @@ public class Modem {
                         // TODO: DEBUG
                         long endTime = System.nanoTime();
                         long totalTime = (endTime - startTime) / 1000000;
-                        System.out.println("TX duration, ms: " + totalTime);
-                        System.out.println("TX, bytes: " + bytesToSend.length);
-                        System.out.println("TX rate, bit/s: " + (bytesToSend.length * 8) / (totalTime / 1000));
+                        loggingclass.writelog("TX duration, ms: " + totalTime, null);
+                        loggingclass.writelog("TX, bytes: " + bytesToSend.length, null);
+                        loggingclass.writelog("TX rate, bit/s: " + (bytesToSend.length * 8) / (totalTime / 1000), null);
                     } catch (Exception e) {
-                        loggingclass.writelog("Can't output sound. Is Sound device busy?", null, true);
+                        loggingclass.writelog("Can't output sound. Is Sound device busy?", e);
                     } finally {
                         Processor.TXActive = false;
                         //Restart modem reception

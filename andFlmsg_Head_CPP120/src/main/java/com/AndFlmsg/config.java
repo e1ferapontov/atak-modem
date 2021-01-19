@@ -16,10 +16,8 @@ package com.AndFlmsg;
 
 import android.app.Activity;
 import android.app.AlertDialog;
-import android.content.Context;
 import android.content.DialogInterface;
 import android.content.SharedPreferences;
-import android.preference.PreferenceActivity;
 
 public class config {
     public static String getPreferenceS(String Key) {
@@ -62,8 +60,7 @@ public class config {
                     myReturn = Integer.parseInt(myPref);
                 } catch (NumberFormatException ex) {
                     //Return zero is probably the best logic here since we cannot interract with the user anyway
-                    loggingclass.writelog("Cannot convert preference [" + Key + "] to a number" + ex.getMessage(),
-                            null, true);
+                    loggingclass.writelog("Cannot convert preference [" + Key + "] to a number" + ex.getMessage(), null);
                     myReturn = 0;
                 }
             }
@@ -88,8 +85,7 @@ public class config {
                     myReturn = Double.parseDouble(myPref);
                 } catch (NumberFormatException ex) {
                     //Return zero is probably the best logic here since we cannot interract with the user anyway
-                    loggingclass.writelog("Cannot convert preference [" + Key + "] to a number" + ex.getMessage(),
-                            null, true);
+                    loggingclass.writelog("Cannot convert preference [" + Key + "] to a number" + ex.getMessage(), null);
                     myReturn = 0.0f;
                 }
             }
@@ -175,7 +171,6 @@ public class config {
                         //Restore RX and TX RSID in case they were disabled by error
                         editor.putBoolean("RXRSID", false);
                         editor.putBoolean("TXRSID", false);
-
 
                         //General and GUI
                         editor.putBoolean("USEMODELIST", false);

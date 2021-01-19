@@ -15,25 +15,23 @@
 
 package com.AndFlmsg;
 
-import java.util.concurrent.Semaphore;
 import android.app.Service;
 import android.content.Intent;
 import android.os.IBinder;
+
+import java.util.concurrent.Semaphore;
 
 
 /**
  * @author John Douyere (VK2ETA)
  */
 public class Processor extends Service {
-
-
-    static String application = "AndFlmsg 1.4.2"; // Used to preset an empty status
+    //Semaphores to instruct the RxTx Thread to start or stop
+    public static Semaphore restartRxModem = new Semaphore(1, false);
     static String version = "Version 1.4.2, 2020-12-01";
 
     static String ModemPreamble = "";  // String to send before any Tx Buffer
     static String ModemPostamble = ""; // String to send after any Tx buffer
-    static String HomePath = "";
-    static String Dirprefix = "";
     static boolean compressedMsg = false;
     static String CrcString = "";
     static String FileNameString = "";
@@ -45,17 +43,11 @@ public class Processor extends Service {
     static int RxModem = Modem.customModeListInt[0];
 
     static int imageTxModemIndex = 0;
-
-
-    //Semaphores to instruct the RxTx Thread to start or stop
-    public static Semaphore restartRxModem = new Semaphore(1, false);
-
     // globals to pass info to gui windows
     static String monitor = "";
     static String TXmonitor = "";
     static String TermWindow = "";
     static int cpuload;
-
     // globals for communication
     static String mycall;     // my call sign from options
     static int DCDthrow;
@@ -64,16 +56,43 @@ public class Processor extends Service {
     // Error handling and logging object
     static loggingclass log;
 
+    static {
+        System.loadLibrary("AndFlmsg_Flmsg_Interface");
+    }
 
     public static void processor() {
         //Nothing as this is a service
+    }
+
+    //Declaration of native classes
+    public native static void saveEnv();
+
+    //Post to main terminal window
+    public static void PostToTerminal(String text) {
+        Processor.TermWindow += text;
+        AndFlmsg.mHandler.post(AndFlmsg.addtoterminal);
+    }
+
+    private static void handleinitialization() {
+
+        try {
+            // Initialize send queue
+            TX_Text = "";
+            ModemPreamble = config.getPreferenceS("MODEMPREAMBLE", "");
+            ModemPostamble = config.getPreferenceS("MODEMPOSTAMBLE", "");
+            // Compression settings
+            compressedMsg = config.getPreferenceB("COMPRESSED");
+            Processor.mycall = config.getPreferenceS("CALL");
+        } catch (Exception e) {
+            loggingclass.writelog("Problems with config parameter.", e);
+        }
     }
 
     @Override
     public void onCreate() {
 
         //Save Environment if we need to access Java code/variables from C++
-        Message.saveEnv();
+        saveEnv();
 
         // Create error handling class
         log = new loggingclass("AndFlmsg");
@@ -96,7 +115,6 @@ public class Processor extends Service {
         Processor.TermWindow = "";
     }
 
-
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         // Start the RxThread
@@ -113,43 +131,16 @@ public class Processor extends Service {
 
     }
 
-
     @Override
     public void onDestroy() {
         // Kill the Rx Modem thread
         Modem.stopRxModem();
     }
 
-
-    //Post to main terminal window
-    public static void PostToTerminal(String text) {
-        Processor.TermWindow += text;
-        AndFlmsg.mHandler.post(AndFlmsg.addtoterminal);
-    }
-
-    private static void handleinitialization() {
-
-        try {
-            // Initialize send queue
-            TX_Text = "";
-            ModemPreamble = config.getPreferenceS("MODEMPREAMBLE", "");
-            ModemPostamble = config.getPreferenceS("MODEMPOSTAMBLE", "");
-            // Compression settings
-            compressedMsg = config.getPreferenceB("COMPRESSED");
-            Processor.mycall = config.getPreferenceS("CALL");
-            System.out.println("CALL: " + Processor.mycall);
-        } catch (Exception e) {
-            loggingclass.writelog("Problems with config parameter.", e, true);
-        }
-    }
-
-
     @Override
     public IBinder onBind(Intent arg0) {
         // Nothing here, not used
         return null;
     }
-
-
 }
 
