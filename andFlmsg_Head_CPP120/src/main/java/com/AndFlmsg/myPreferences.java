@@ -19,9 +19,11 @@ package com.AndFlmsg;
  */
 
 
+import android.app.Activity;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.preference.CheckBoxPreference;
+import android.preference.Preference;
 import android.preference.PreferenceActivity;
 import android.preference.PreferenceCategory;
 
@@ -29,10 +31,23 @@ import android.preference.PreferenceCategory;
 public class myPreferences extends PreferenceActivity {
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    protected void onCreate(final Bundle savedInstanceState) {
+        final Activity activity = this;
+
         super.onCreate(savedInstanceState);
         //Start from the fixed section of the preferences
         addPreferencesFromResource(R.xml.preferences);
+
+        // Add reset defaults preference
+        Preference button = getPreferenceManager().findPreference("defaultPreferences");
+        assert button != null;
+        button.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
+            @Override
+            public boolean onPreferenceClick(Preference preference) {
+                config.restoreSettingsToDefault(activity);
+                return true;
+            }
+        });
 
         //Now add the dynamic part of the preferences (mode list etc...).
         PreferenceCategory targetCategory = (PreferenceCategory) findPreference("listofmodestouse");

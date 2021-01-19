@@ -6,8 +6,4 @@
     </item>
     <item android:id="@+id/prefs"
         android:title="@string/txt_Settings" />
-    <item
-        android:id="@+id/defaultPreferences"
-        android:title="@string/txt_RestoreSettingsToDefault">
-    </item>
 </menu>

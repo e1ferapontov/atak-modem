@@ -16,7 +16,6 @@
 package com.AndFlmsg;
 
 import android.content.SharedPreferences;
-import android.graphics.Bitmap;
 import android.media.AudioFormat;
 import android.media.AudioManager;
 import android.media.AudioRecord;
@@ -25,8 +24,6 @@ import android.media.MediaRecorder.AudioSource;
 import android.os.Process;
 
 import java.nio.charset.StandardCharsets;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 public class Modem {
 
@@ -49,7 +46,6 @@ public class Modem {
 
     private static boolean FirstBracketReceived = false;
     public static String MonitorString = "";
-    public static boolean WrapLF = false;
     private static String BlockString = "";
     private static long lastCharacterTime = 0;
 
@@ -75,31 +71,12 @@ public class Modem {
     public static String[] customModeListString = new String[MAXMODES];
     public static int customNumModes = 0;
 
-
-    public static int minImageModeIndex;
-    public static int maxImageModeIndex;
-
-
     //Tx variables
     public static AudioTrack txAt = null;
-    public static boolean modemIsTuning = false;
 
     //RSID Flags
     public static boolean rxRsidOn;
     public static boolean txRsidOn;
-
-    //JD debug
-    private static boolean CModemInitialized = false;
-
-    //Mfsk picture
-    public static int[] picBuffer;
-    private static int pixelNumber;
-    public static Bitmap picBitmap = null;
-    public static int mfskPicHeight = 0;
-    public static int mfskPicWidth = 0;
-    public static String lastSavedPictureFn = "";
-    public static int slantValue = 0;
-
 
     //Declaration of native classes
     private native static String createCModem(int modemCode);
@@ -259,18 +236,6 @@ public class Modem {
     }
 
 
-    //Return true if the mode can send a picture
-    public static boolean canSendPicture(int thisMode) {
-        //To check is the modem can TX pictures, use the mode name
-        int j = getModeIndexFullList(thisMode);
-        String modemName = modemCapListString[j];
-        return modemName.equalsIgnoreCase("MFSK16") ||
-                modemName.equalsIgnoreCase("MFSK32") ||
-                modemName.equalsIgnoreCase("MFSK64") ||
-                modemName.equalsIgnoreCase("MFSK128");
-    }
-
-
     private static void soundInInit() {
         bufferSize = (int) sampleRate; // 1 second of Audio max
         if (bufferSize < AudioRecord.getMinBufferSize((int) sampleRate, AudioFormat.CHANNEL_IN_MONO, AudioFormat.ENCODING_PCM_16BIT)) {
@@ -279,14 +244,7 @@ public class Modem {
         }
         int ii = 20; //number of 1/4 seconds wait
         while (--ii > 0) {
-            if (AndFlmsg.toBluetooth) {
-                //Bluetooth hack (use voice call)
-                audiorecorder = new AudioRecord(AudioSource.MIC, 8000, android.media.AudioFormat.CHANNEL_IN_MONO,
-                        android.media.AudioFormat.ENCODING_PCM_16BIT, bufferSize);
-            } else {
-                audiorecorder = new AudioRecord(AudioSource.MIC, 8000, android.media.AudioFormat.CHANNEL_IN_MONO,
-                        android.media.AudioFormat.ENCODING_PCM_16BIT, bufferSize);
-            }
+            audiorecorder = new AudioRecord(AudioSource.MIC, 8000, android.media.AudioFormat.CHANNEL_IN_MONO, android.media.AudioFormat.ENCODING_PCM_16BIT, bufferSize);
             if (audiorecorder.getState() == AudioRecord.STATE_INITIALIZED) {
                 ii = 0;//ok done
             } else {
@@ -329,14 +287,13 @@ public class Modem {
                     double endproctime = 0;
                     int numSamples8K = 0;
                     Modem.soundInInit();
-                    //debugging only
-                    //Message.addEntryToLog(Message.dateTimeStamp() + "Done 'soundInInit'");
+
                     NumberOfOverruns = 0;
                     try {
                         //Catch un-initialized audio recorder
                         audiorecorder.startRecording();
                     } catch (IllegalStateException e) {
-                        //e.printStackTrace();
+                        e.printStackTrace();
                     }
                     RxON = true;
                     Processor.restartRxModem.drainPermits();
@@ -344,40 +301,20 @@ public class Modem {
                     short[] so8K = new short[bufferSize];
                     int size12Kbuf = (int) ((bufferSize + 1) * 11025.0 / 8000.0);
                     //Android changed to float to match rsid.cxx code
-                    //double[] so12K = new double[size12Kbuf];
                     float[] so12K = new float[size12Kbuf];
                     //Initialise modem
-                    //debugging only
-                    //Message.addEntryToLog(Message.dateTimeStamp() + "About to do 'createCModem' with Modem" + Processor.RxModem);
-                    String modemCreateResult = createCModem(Processor.RxModem);
-                    //debugging only
-                    //Message.addEntryToLog(Message.dateTimeStamp() + "Done 'createCModem'");
-                    if (modemCreateResult.contains("ERROR")) {
-                        CModemInitialized = false;
-                    } else {
-                        CModemInitialized = true;
-                        //Initialize RX side of modem
-                        boolean slowCpu = config.getPreferenceB("SLOWCPU", false);
-                        setSlowCpuFlag(slowCpu);
-                        //Changed to getPreferencesI in case it is not an interger representation
-                        //String frequencySTR = config.getPreferenceS("AFREQUENCY","1000");
-                        //double centerfreq = Integer.parseInt(frequencySTR);
-                        double centerfreq = config.getPreferenceI("AFREQUENCY", 1000);
-                        //Limit it's values too
-                        if (centerfreq > 2500) centerfreq = 2500;
-                        if (centerfreq < 500) centerfreq = 500;
-                        String modemInitResult = initCModem(centerfreq);
-                        //debugging only
-                        //Message.addEntryToLog(Message.dateTimeStamp() + "Done 'initCModem'");
-                        //Android Debug
-                        //   Modem.MonitorString = modemInitResult;
-                        //Prepare RSID Modem
-                        createRsidModem();
-                        //debugging only
-                        //Message.addEntryToLog(Message.dateTimeStamp() + "Done 'createRsidModem'");
-                    }
-                    //debugging only
-                    //Message.addEntryToLog(Message.dateTimeStamp() + "Starting Rx loop");
+                    createCModem(Processor.RxModem);
+                    //Initialize RX side of modem
+                    boolean slowCpu = config.getPreferenceB("SLOWCPU", false);
+                    setSlowCpuFlag(slowCpu);
+                    //Changed to getPreferencesI in case it is not an interger representation
+                    double centerfreq = config.getPreferenceI("AFREQUENCY", 1500);
+                    //Limit it's values too
+                    if (centerfreq > 2500) centerfreq = 2500;
+                    if (centerfreq < 500) centerfreq = 500;
+                    String modemInitResult = initCModem(centerfreq);
+                    //Prepare RSID Modem
+                    createRsidModem();
                     while (RxON) {
                         endproctime = System.currentTimeMillis();
                         double buffertime = (double) numSamples8K / 8000.0 * 1000.0; //in milliseconds
@@ -398,10 +335,7 @@ public class Modem {
                                     //Conditional Rx RSID (keep the FFT processing for the waterfall)
                                     rsidReturnedString = RsidCModemReceive(so12K, numSamples12K, rxRsidOn);
                                     //As we flushed the RX pipe automatically, we need to process
-                                    // any left-over characters from the previous modem (critical
-                                    // for MT63 and Olivia in particular)
-                                    //Done in processRxChar() below now
-                                    //Modem.MonitorString += rsidReturnedString;
+                                    // any left-over characters from the previous modem
                                     //Processing of the characters received
                                     for (int i = 0; i < rsidReturnedString.length(); i++) {
                                         processRxChar(rsidReturnedString.charAt(i));
@@ -410,15 +344,12 @@ public class Modem {
                                     rsidReturnedString = "";
                                 }
                                 if (rxRsidOn) {
-                                    //if (rsidReturnedString.startsWith("\nRSID:")) {
                                     if (rsidReturnedString.contains("\nRSID:")) {
                                         //We have a new modem and/or centre frequency
-                                        //Modem.MonitorString += rsidReturnedString; //Done elsewhere now
                                         //Update the RSID waterfall frequency too
                                         frequency = getCurrentFrequency();
                                         Processor.RxModem = getCurrentMode();
                                         AndFlmsg.saveLastModeUsed(Processor.RxModem);
-                                        AndFlmsg.mHandler.post(AndFlmsg.updatetitle);
                                     }
                                 }
                                 //Sets the latest squelch level for the modem to use
@@ -442,8 +373,7 @@ public class Modem {
                                 AndFlmsg.mHandler.post(AndFlmsg.addtomodem);
                             }
                         }
-                    }//while (RxON)
-                    //We dropped here on pause flag
+                    }
                     if (audiorecorder != null) {
                         //Avoid some crashes on wrong state
                         if (audiorecorder.getState() == AudioRecord.STATE_INITIALIZED) {
@@ -463,12 +393,10 @@ public class Modem {
                     Processor.restartRxModem.acquireUninterruptibly(1);
                     //Make sure we don's have spare permits
                     Processor.restartRxModem.drainPermits();
-                }//while (modemThreadOn)
-                //We dropped here on thread stop request
+                }
                 modemState = RXMODEMIDLE;
-            } //run
-        }).start(); //	new Thread(new Runnable() {
-
+            }
+        }).start();
     }
 
 
@@ -498,7 +426,7 @@ public class Modem {
     }
 
     static void reset() {
-        String frequencySTR = config.getPreferenceS("AFREQUENCY", "1000");
+        String frequencySTR = config.getPreferenceS("AFREQUENCY", "1500");
         frequency = Integer.parseInt(frequencySTR);
         if (frequency < 500) frequency = 500;
         if (frequency > 2500) frequency = 2500;
@@ -542,10 +470,8 @@ public class Modem {
                     if (!FirstBracketReceived) {
                         FirstBracketReceived = true;
                         BlockString = "[";
-                        //Processor.PostToTerminal("FirstBracket\n");
                     }
                 }
-                //	            Main.DCD = 0;
                 break;
             case 10: //Line Feed
                 MonitorString += "\n";
@@ -644,12 +570,13 @@ public class Modem {
 
                 if (Processor.DCDthrow == 0) {
                     try {
+                        // TODO: DEBUG
                         long startTime = System.nanoTime();
+
                         //Reset the stop flag if it was ON
                         Modem.stopTX = false;
                         //Set flags to TXing
                         Processor.TXActive = true;
-                        Processor.Status = AndFlmsg.myContext.getString(R.string.txt_Transmitting);
                         //Stop the modem receiving side
                         pauseRxModem();
 
@@ -675,10 +602,9 @@ public class Modem {
                         Modem.txInit(frequency);
                         //Encode character buffer into sound
                         //Changed for Utf-8 variable length codes
-                        //Modem.txCProcess(txSendline.getBytes(), txSendline.length());
                         byte[] bytesToSend = null;
                         try {
-                            bytesToSend = txSendline.getBytes(StandardCharsets.UTF_8);
+                            bytesToSend = txSendline.getBytes("UTF-8");
                         } catch (Exception e) { //Invalid UTF-8 characters
                             bytesToSend[0] = 0;//Null character
                         }
@@ -686,8 +612,6 @@ public class Modem {
 
                         //Stop audio track
                         txAt.stop();
-                        //debugging only
-                        //Message.addEntryToLog(Message.dateTimeStamp() + "Done 'txAt.stop'");
                         //Wait for end of audio play to avoid
                         //overlaps between end of TX and start of RX
                         while (txAt.getPlayState() == AudioTrack.PLAYSTATE_PLAYING) {
@@ -698,12 +622,11 @@ public class Modem {
                                 //e.printStackTrace();
                             }
                         }
-                        //debugging only
-                        //Message.addEntryToLog(Message.dateTimeStamp() + "Done 'waiting for end of playing state'");
                         //Android debug add a fixed delay to avoid cutting off the tail end of the modulation
                         Thread.sleep(500);
                         txAt.release();
 
+                        // TODO: DEBUG
                         long endTime = System.nanoTime();
                         long totalTime = (endTime - startTime) / 1000000;
                         System.out.println("TX duration, ms: " + totalTime);
@@ -713,14 +636,8 @@ public class Modem {
                         loggingclass.writelog("Can't output sound. Is Sound device busy?", null, true);
                     } finally {
                         Processor.TXActive = false;
-                        Processor.Status = AndFlmsg.myContext.getString(R.string.txt_Listening);
-                        //VK2ETA added to clear progress info during a tune
-                        AndFlmsg.txProgressCount = "";
-                        AndFlmsg.mHandler.post(AndFlmsg.updatetitle);
                         //Restart modem reception
                         unPauseRxModem();
-                        //debugging only
-                        //Message.addEntryToLog(Message.dateTimeStamp() + "Done 'unPauseRxModem'");
                     }
 
                 }

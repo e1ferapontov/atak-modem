@@ -54,7 +54,6 @@ public class Processor extends Service {
     static String monitor = "";
     static String TXmonitor = "";
     static String TermWindow = "";
-    static String Status = AndFlmsg.myContext.getString(R.string.txt_Listening);
     static int cpuload;
 
     // globals for communication
@@ -87,11 +86,6 @@ public class Processor extends Service {
 
         //Check that we have a current mode, otherwise take the first one in the list (useful when we have a NIL list of custom modes)
         Processor.RxModem = Processor.TxModem = Modem.customModeListInt[Modem.getModeIndex(Processor.RxModem)];
-
-        //Set the image modes defaults and limits
-        imageTxModemIndex = Modem.getModeIndexFullList(Modem.getMode("MFSK64"));
-        Modem.minImageModeIndex = Modem.getModeIndexFullList(Modem.getMode("MFSK16"));
-        Modem.maxImageModeIndex = Modem.getModeIndexFullList(Modem.getMode("MFSK128"));
 
         //Reset frequency and squelch
         Modem.reset();

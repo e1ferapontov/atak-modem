@@ -7,14 +7,12 @@
 	android:orientation="vertical"
 	android:id="@+id/modemnwfscreen" >
 	<LinearLayout
-	    android:id="@+id/FrameLayout1"
-	    android:layout_width="fill_parent"
+		android:layout_width="fill_parent"
 	    android:layout_height="wrap_content"
 	    android:layout_gravity="center_vertical"
 	    android:weightSum="1" >
 		<TextView
-		    android:id="@+id/cputext"
-		    android:layout_width="fill_parent"
+			android:layout_width="fill_parent"
 		    android:layout_height="wrap_content"
 		    android:layout_weight="0.90"
 		    android:text="@string/txt_CPU" >
@@ -43,14 +41,12 @@
 		</TextView>
 	</ScrollView>
 	<LinearLayout
-	    android:id="@+id/FrameLayout2"
-	    android:layout_width="fill_parent"
+		android:layout_width="fill_parent"
 	    android:layout_height="wrap_content"
 	    android:layout_gravity="center_vertical"
 	    android:weightSum="1" >
 		<TextView
-		    android:id="@+id/cputext2"
-		    android:layout_width="fill_parent"
+			android:layout_width="fill_parent"
 		    android:layout_height="wrap_content"
 		    android:layout_weight="0.90"
 			android:text="@string/txt_S2N" >
@@ -67,7 +63,7 @@
 		    android:minHeight="8dp"
 		    android:progress="0" />
 	</LinearLayout>
-	<LinearLayout android:id="@+id/FrameLayout3"
+	<LinearLayout
 		android:layout_width="fill_parent"
 		android:layout_height="47dp"
 		android:weightSum="1"

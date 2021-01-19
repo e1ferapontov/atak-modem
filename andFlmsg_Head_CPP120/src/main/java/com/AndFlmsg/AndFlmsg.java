@@ -33,7 +33,6 @@ import android.content.SharedPreferences;
 import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
-import android.graphics.drawable.BitmapDrawable;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
@@ -44,14 +43,10 @@ import android.support.v4.app.TaskStackBuilder;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.text.Editable;
-import android.text.Html;
 import android.text.TextWatcher;
 import android.util.TypedValue;
-import android.view.Display;
 import android.view.GestureDetector;
 import android.view.GestureDetector.SimpleOnGestureListener;
-import android.view.Gravity;
-import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -61,17 +56,13 @@ import android.view.View.OnClickListener;
 import android.view.ViewConfiguration;
 import android.view.ViewGroup;
 import android.view.Window;
-import android.view.WindowManager;
 import android.view.animation.AlphaAnimation;
 import android.view.animation.Animation;
 import android.view.animation.AnimationSet;
 import android.view.animation.LayoutAnimationController;
 import android.view.animation.TranslateAnimation;
 import android.widget.Button;
-import android.widget.CheckBox;
 import android.widget.EditText;
-import android.widget.ImageView;
-import android.widget.PopupWindow;
 import android.widget.ProgressBar;
 import android.widget.ScrollView;
 import android.widget.TextView;
@@ -94,8 +85,6 @@ public class AndFlmsg extends AppCompatActivity {
     public static boolean RXParamsChanged = false;
 
     public static SharedPreferences mysp = null;
-
-    private static boolean hasDisplayedWelcome = false;
 
     // Horizontal Fling detection despite scrollview
     private GestureDetector mGesture;
@@ -122,13 +111,10 @@ public class AndFlmsg extends AppCompatActivity {
     private static TextView myModemTV;
     private static ScrollView myModemSC;
 
-    public static View pwLayout;
-
     private static String savedTextMessage = "";
 
     // Generic button variable. Just for callback initialisation
     private Button myButton;
-    private CheckBox checkbox = null;
 
     public static String TerminalBuffer = "";
     public static String ModemBuffer = "";
@@ -137,11 +123,7 @@ public class AndFlmsg extends AppCompatActivity {
     // Can be stopped (i.e no RX) to save battery and allow Android to reclaim
     // resources if not visible to the user
     public static boolean ProcessorON = false;
-    private static boolean modemPaused = false;
-
-    //For providing a progress on the number of messages and for each message the % complete
-    public static String txMessageCount = "";
-    public static String txProgressCount = "";
+    private static final boolean modemPaused = false;
 
     // Notifications
     //private NotificationManager myNotificationManager;
@@ -149,43 +131,9 @@ public class AndFlmsg extends AppCompatActivity {
 
     // Need handler for callbacks to the UI thread
     public static final Handler mHandler = new Handler();
-    public static Runnable displayMessagesRunnable = null;
-
-    // Bluetooth handfree / headset
-    public static boolean toBluetooth = false;
 
     // Listener for changes in preferences
     public static OnSharedPreferenceChangeListener splistener;
-
-    // Create runnable for changing the main window's title
-    public static final Runnable updatetitle = new Runnable() {
-        public void run() {
-            int mIndex = Modem.getModeIndexFullList(Processor.RxModem);
-            //SAMSUNG & WIKO appcompat BUG Workaround
-            try {
-                //Only if buttons shown in the action bar ((AppCompatActivity) myContext).supportInvalidateOptionsMenu();
-                if (ProcessorON) {
-                    if (Processor.TXActive) {
-                        //		    myWindow.setTitleColor(Color.YELLOW);
-                        ((AppCompatActivity) myContext).getSupportActionBar().setTitle((Html.fromHtml("<font color=\"#FFFF00\">"
-                                + "AndFlmsg- " + Modem.modemCapListString[mIndex] + " - " + Processor.Status + AndFlmsg.txMessageCount
-                                + AndFlmsg.txProgressCount
-                                + "</font>")));
-                    } else {
-                        //		    myWindow.setTitleColor(Color.CYAN);
-                        ((AppCompatActivity) myContext).getSupportActionBar().setTitle((Html.fromHtml("<font color=\"#33D6FF\">" +
-                                "AndFlmsg-" + Modem.modemCapListString[mIndex] + " - " + Processor.Status + "</font>")));
-                        txProgressCount = ""; //Reset percent complete of file TX
-                    }
-                } else {
-                    ((AppCompatActivity) myContext).getSupportActionBar().setTitle((Html.fromHtml("<font color=\"#FFFFFF\">"
-                            + "AndFlmsg - Modem OFF" + "</font>")));
-                }
-            } catch (Throwable x) {
-                loggingclass.writelog("\nDebug Information: Samsung/Wiko appcompat compatibility issue workaround activated!", null, true);
-            }
-        }
-    };
 
     // Runnable for updating the signal quality bar in Modem Window
     public static final Runnable updatesignalquality = new Runnable() {
@@ -252,7 +200,6 @@ public class AndFlmsg extends AppCompatActivity {
                     myModemSC.post(new Runnable() {
                         public void run() {
                             myModemSC.fullScroll(View.FOCUS_DOWN);
-                            // myModemSC.smoothScrollBy(20,0);
                         }
                     });
                 }
@@ -640,7 +587,6 @@ public class AndFlmsg extends AppCompatActivity {
                 ProcessorON = true;
             }
         }
-        AndFlmsg.mHandler.post(AndFlmsg.updatetitle);
     }
 
     @Override
@@ -676,12 +622,6 @@ public class AndFlmsg extends AppCompatActivity {
     // Customize the Option Menu at run time
     @Override
     public boolean onPrepareOptionsMenu(Menu menu) {
-
-	/*if (Modem.canSendPicture(Processor.RxModem))
-	    menu.findItem(R.id.sendimage).setEnabled(true);
-	    else menu.findItem(R.id.sendimage).setEnabled(false);
-    */
-
         return super.onPrepareOptionsMenu(menu);
     }
 
@@ -696,9 +636,6 @@ public class AndFlmsg extends AppCompatActivity {
                 Intent OptionsActivity = new Intent(AndFlmsg.this,
                         myPreferences.class);
                 startActivity(OptionsActivity);
-                break;
-            case R.id.defaultPreferences:
-                config.restoreSettingsToDefault();
                 break;
             case R.id.exit:
                 myAlertDialog.setMessage(getString(R.string.txt_AreYouSureExit));
@@ -808,14 +745,13 @@ public class AndFlmsg extends AppCompatActivity {
         final String welcomeString = "\n" + AndFlmsg.myContext.getString(R.string.txt_WelcomeToAndFlmsg) + " "
                 + Processor.version
                 + AndFlmsg.myContext.getString(R.string.txt_WelcomeIntro);
-        if (TerminalBuffer.length() == 0 && !hasDisplayedWelcome) {
+        if (TerminalBuffer.length() == 0) {
             TerminalBuffer = welcomeString;
         } else {
             if (TerminalBuffer.equals(welcomeString)) {
                 TerminalBuffer = "";
             }
         }
-        hasDisplayedWelcome = true;
         // Reset terminal display in case it was blanked out by a new oncreate
         // call
         myTermTV.setText(TerminalBuffer);
@@ -913,7 +849,6 @@ public class AndFlmsg extends AppCompatActivity {
                                 .getModeUpDown(Processor.RxModem, +1);
                         Modem.changemode(Processor.RxModem); // to make the changes effective
                         saveLastModeUsed(Processor.RxModem);
-                        AndFlmsg.mHandler.post(AndFlmsg.updatetitle);
                     }
                 }
                 // JD fix this catch action
@@ -936,7 +871,6 @@ public class AndFlmsg extends AppCompatActivity {
                                 .getModeUpDown(Processor.RxModem, -1);
                         Modem.changemode(Processor.RxModem); // to make the changes effective
                         saveLastModeUsed(Processor.RxModem);
-                        AndFlmsg.mHandler.post(AndFlmsg.updatetitle);
                     }
                 }
                 // JD fix this catch action
