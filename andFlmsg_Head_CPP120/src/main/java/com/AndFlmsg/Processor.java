@@ -37,12 +37,12 @@ public class Processor extends Service {
     static String FileNameString = "";
     static boolean TXActive = false;
 
-
     //JD temp FIX: init as first modem in list
-    static int TxModem = Modem.customModeListInt[0];
-    static int RxModem = Modem.customModeListInt[0];
+    private static final int savedModeIndex = Modem.getModeIndex(config.getPreferenceI("LASTMODEUSED", Modem.getMode("8PSK1000")));
 
-    static int imageTxModemIndex = 0;
+    static int TxModem = Modem.customModeListInt[savedModeIndex];
+    static int RxModem = Modem.customModeListInt[savedModeIndex];
+
     // globals to pass info to gui windows
     static String monitor = "";
     static String TXmonitor = "";
@@ -51,7 +51,6 @@ public class Processor extends Service {
     // globals for communication
     static String mycall;     // my call sign from options
     static int DCDthrow;
-    static boolean ReceivingForm = false;
     static String TX_Text; // output queue
     // Error handling and logging object
     static loggingclass log;
@@ -67,14 +66,7 @@ public class Processor extends Service {
     //Declaration of native classes
     public native static void saveEnv();
 
-    //Post to main terminal window
-    public static void PostToTerminal(String text) {
-        Processor.TermWindow += text;
-        AndFlmsg.mHandler.post(AndFlmsg.addtoterminal);
-    }
-
     private static void handleinitialization() {
-
         try {
             // Initialize send queue
             TX_Text = "";
@@ -91,11 +83,9 @@ public class Processor extends Service {
     @Override
     public void onCreate() {
 
+        loggingclass.writelog("awdawdawd modem" + TxModem, null);
         //Save Environment if we need to access Java code/variables from C++
         saveEnv();
-
-        // Create error handling class
-        log = new loggingclass("AndFlmsg");
 
         // Get settings and initialize
         handleinitialization();

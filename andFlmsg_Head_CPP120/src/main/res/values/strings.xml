@@ -21,7 +21,7 @@
     <string name="txt_CPU">CPU</string>
     <string name="txt_Cancel">Cancel</string>
     <string name="txt_Exit">EXIT</string>
-    <string name="txt_FldigiModemOn">Fdigi Modem ON, Microphone/Bluetooth in use by Modem</string>
+    <string name="txt_FldigiModemOn">Fdigi Modem ON, Microphone in use by Modem</string>
     <string name="txt_Listening">Listening</string>
     <string name="txt_ModemON">Modem ON</string>
     <string name="txt_ModemScreen">Modem Screen</string>
@@ -35,7 +35,7 @@
     <string name="txt_WelcomeToAndFlmsg">Welcome to AndFlmsg</string>
     <string name="txt_Yes">Yes</string>
 
-    <string name="pref_PSK" translatable="false">PSK</string>
+    <string name="pref_PSK" translatable="false">8PSK</string>
     <string name="txt_app_name" translatable="false">AndFlmsg</string>
     <string name="txt_0000" translatable="false">0000</string>
     <string name="txt_Settings">Settings</string>

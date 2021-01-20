@@ -74,10 +74,6 @@ import java.lang.reflect.Field;
 @SuppressLint("SetJavaScriptEnabled")
 public class AndFlmsg extends AppCompatActivity {
 
-    public static Context myContext;
-
-    public static AndFlmsg myInstance = null;
-
     private static boolean havePassedAllPermissionsTest = false;
 
     public static Window myWindow = null;
@@ -285,10 +281,7 @@ public class AndFlmsg extends AppCompatActivity {
     }
 
 
-    public static boolean bluetoothPermit = false;
-    public static boolean bluetoothAdminPermit = false;
     public static boolean readLogsPermit = false;
-    public static boolean fineLocationPermit = false;
     public static boolean writeExtStoragePermit = false;
     public static boolean recordAudioPermit = false;
     public static boolean modifyAudioSettingsPermit = false;
@@ -297,9 +290,6 @@ public class AndFlmsg extends AppCompatActivity {
     public static boolean readPhoneStatePermit = false;
     private final int REQUEST_PERMISSIONS = 15556;
     public final String[] permissionList = {
-            Manifest.permission.ACCESS_FINE_LOCATION,
-            Manifest.permission.BLUETOOTH,
-            Manifest.permission.BLUETOOTH_ADMIN,
             Manifest.permission.WRITE_EXTERNAL_STORAGE,
             Manifest.permission.RECORD_AUDIO,
             Manifest.permission.MODIFY_AUDIO_SETTINGS,
@@ -312,26 +302,22 @@ public class AndFlmsg extends AppCompatActivity {
 
     //Request permission from the user
     private void requestAllCriticalPermissions() {
-        ActivityCompat.requestPermissions(myInstance, permissionList, REQUEST_PERMISSIONS);
+        ActivityCompat.requestPermissions(this, permissionList, REQUEST_PERMISSIONS);
     }
 
 
     private boolean allPermissionsOk() {
         final int granted = PackageManager.PERMISSION_GRANTED;
 
-        fineLocationPermit = ContextCompat.checkSelfPermission(myContext, Manifest.permission.ACCESS_FINE_LOCATION) == granted;
-        bluetoothPermit = ContextCompat.checkSelfPermission(myContext, Manifest.permission.BLUETOOTH) == granted;
-        bluetoothAdminPermit = ContextCompat.checkSelfPermission(myContext, Manifest.permission.BLUETOOTH_ADMIN) == granted;
-        writeExtStoragePermit = ContextCompat.checkSelfPermission(myContext, Manifest.permission.WRITE_EXTERNAL_STORAGE) == granted;
-        recordAudioPermit = ContextCompat.checkSelfPermission(myContext, Manifest.permission.RECORD_AUDIO) == granted;
-        modifyAudioSettingsPermit = ContextCompat.checkSelfPermission(myContext, Manifest.permission.MODIFY_AUDIO_SETTINGS) == granted;
-        readLogsPermit = ContextCompat.checkSelfPermission(myContext, Manifest.permission.READ_LOGS) == granted;
-        broadcastStickyPermit = ContextCompat.checkSelfPermission(myContext, Manifest.permission.BROADCAST_STICKY) == granted;
-        internetPermit = ContextCompat.checkSelfPermission(myContext, Manifest.permission.INTERNET) == granted;
-        readPhoneStatePermit = ContextCompat.checkSelfPermission(myContext, Manifest.permission.READ_PHONE_STATE) == granted;
+        writeExtStoragePermit = ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) == granted;
+        recordAudioPermit = ContextCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO) == granted;
+        modifyAudioSettingsPermit = ContextCompat.checkSelfPermission(this, Manifest.permission.MODIFY_AUDIO_SETTINGS) == granted;
+        readLogsPermit = ContextCompat.checkSelfPermission(this, Manifest.permission.READ_LOGS) == granted;
+        broadcastStickyPermit = ContextCompat.checkSelfPermission(this, Manifest.permission.BROADCAST_STICKY) == granted;
+        internetPermit = ContextCompat.checkSelfPermission(this, Manifest.permission.INTERNET) == granted;
+        readPhoneStatePermit = ContextCompat.checkSelfPermission(this, Manifest.permission.READ_PHONE_STATE) == granted;
 
-        return fineLocationPermit && bluetoothPermit && bluetoothAdminPermit && writeExtStoragePermit
-                && recordAudioPermit && modifyAudioSettingsPermit //&& readLogsPermit never granted in later versions of Android
+        return recordAudioPermit && modifyAudioSettingsPermit //&& readLogsPermit never granted in later versions of Android
                 && broadcastStickyPermit && internetPermit && readPhoneStatePermit;
     }
 
@@ -341,28 +327,28 @@ public class AndFlmsg extends AppCompatActivity {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         int granted = PackageManager.PERMISSION_GRANTED;
         for (int i = 0; i < grantResults.length; i++) {
-            if (permissions[i].equals(Manifest.permission.ACCESS_FINE_LOCATION)) {
-                fineLocationPermit = grantResults[i] == granted;
-            } else if (permissions[i].equals(Manifest.permission.BLUETOOTH)) {
-                bluetoothPermit = grantResults[i] == granted;
-            } else if (permissions[i].equals(Manifest.permission.BLUETOOTH_ADMIN)) {
-                bluetoothAdminPermit = grantResults[i] == granted;
-            } else if (permissions[i].equals(Manifest.permission.WRITE_EXTERNAL_STORAGE)) {
-                writeExtStoragePermit = grantResults[i] == granted;
-            } else if (permissions[i].equals(Manifest.permission.RECORD_AUDIO)) {
-                recordAudioPermit = grantResults[i] == granted;
-            } else if (permissions[i].equals(Manifest.permission.MODIFY_AUDIO_SETTINGS)) {
-                modifyAudioSettingsPermit = grantResults[i] == granted;
-            } else if (permissions[i].equals(Manifest.permission.READ_LOGS)) {
-                readLogsPermit = grantResults[i] == granted;
-            } else if (permissions[i].equals(Manifest.permission.BROADCAST_STICKY)) {
-                broadcastStickyPermit = grantResults[i] == granted;
-            } else if (permissions[i].equals(Manifest.permission.INTERNET)) {
-                internetPermit = grantResults[i] == granted;
-            } else if (permissions[i].equals(Manifest.permission.READ_PHONE_STATE)) {
-                readPhoneStatePermit = grantResults[i] == granted;
-            } else {
-                //Nothing so far
+            switch (permissions[i]) {
+                case Manifest.permission.RECORD_AUDIO:
+                    recordAudioPermit = grantResults[i] == granted;
+                    break;
+                case Manifest.permission.WRITE_EXTERNAL_STORAGE:
+                    writeExtStoragePermit = grantResults[i] == granted;
+                    break;
+                case Manifest.permission.MODIFY_AUDIO_SETTINGS:
+                    modifyAudioSettingsPermit = grantResults[i] == granted;
+                    break;
+                case Manifest.permission.READ_LOGS:
+                    readLogsPermit = grantResults[i] == granted;
+                    break;
+                case Manifest.permission.BROADCAST_STICKY:
+                    broadcastStickyPermit = grantResults[i] == granted;
+                    break;
+                case Manifest.permission.INTERNET:
+                    internetPermit = grantResults[i] == granted;
+                    break;
+                case Manifest.permission.READ_PHONE_STATE:
+                    readPhoneStatePermit = grantResults[i] == granted;
+                    break;
             }
         }
         //Re-do overall check
@@ -413,13 +399,6 @@ public class AndFlmsg extends AppCompatActivity {
             // presumably, not relevant
         }
 
-        // Get a static copy of the base Context
-        myContext = AndFlmsg.this;
-
-        // Get a static copy of the activity instance
-        myInstance = this;
-
-
         //Request all permissions up-front and be done with it.
         //If the app can't perform properly with what is requested then
         // abort rather than have a crippled app running
@@ -452,9 +431,6 @@ public class AndFlmsg extends AppCompatActivity {
 
         // Get new gesture detector for flings over scrollviews
         mGesture = new GestureDetector(this, mOnGesture);
-
-        // Get last mode (if not set, returns -1)
-        Processor.TxModem = Processor.RxModem = config.getPreferenceI("LASTMODEUSED", -1);
 
         // Get the RSID flags from stored preferences
         Modem.txRsidOn = config.getPreferenceB("TXRSID", false);
@@ -495,7 +471,7 @@ public class AndFlmsg extends AppCompatActivity {
         // from the preference activity
 
         // Re-initilize modem when NOT busy to use the latest parameters
-        if (!Processor.ReceivingForm && RXParamsChanged) {
+        if (RXParamsChanged) {
             // Reset flag then stop and restart modem
             RXParamsChanged = false;
             // Cycle modem service off then on
@@ -540,8 +516,7 @@ public class AndFlmsg extends AppCompatActivity {
             if (!ProcessorON && !modemPaused) {
                 String NOTIFICATION_CHANNEL_ID = "com.AndFlmsg";
                 String channelName = "Background Modem";
-                NotificationChannel chan = null;
-                NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(this, NOTIFICATION_CHANNEL_ID);
+                NotificationChannel chan;
                 NotificationCompat.Builder mBuilder;
                 String chanId = "";
                 //New code for support of Android version 8+
@@ -739,9 +714,9 @@ public class AndFlmsg extends AppCompatActivity {
         myWindow = getWindow();
 
         // If blank (on start), display version
-        final String welcomeString = "\n" + AndFlmsg.myContext.getString(R.string.txt_WelcomeToAndFlmsg) + " "
+        final String welcomeString = "\n" + this.getString(R.string.txt_WelcomeToAndFlmsg) + " "
                 + Processor.version
-                + AndFlmsg.myContext.getString(R.string.txt_WelcomeIntro);
+                + this.getString(R.string.txt_WelcomeIntro);
         if (TerminalBuffer.length() == 0) {
             TerminalBuffer = welcomeString;
         } else {
@@ -788,10 +763,8 @@ public class AndFlmsg extends AppCompatActivity {
                 //Clear the text field
                 view.setText("");
                 savedTextMessage = "";
-                if (!Processor.ReceivingForm) {
-                    Processor.TX_Text += (intext + "\n");
-                    Modem.txData("", "", intext + "\n", 0, 0, false, "");
-                }
+                Processor.TX_Text += (intext + "\n");
+                Modem.txData("", "", intext + "\n", 0, 0, false, "");
             }
         });
     }
@@ -816,11 +789,6 @@ public class AndFlmsg extends AppCompatActivity {
         myModemTV.setHorizontallyScrolling(false);
         myModemTV.setTextSize(16);
 
-        //Allow select/copy
-        if (android.os.Build.VERSION.SDK_INT >= 11) {
-            myModemTV.setTextIsSelectable(false);
-        }
-
         // initialise CPU load bar display
         CpuLoad = findViewById(R.id.cpu_load);
 
@@ -832,49 +800,5 @@ public class AndFlmsg extends AppCompatActivity {
         myModemSC = findViewById(R.id.modemscrollview);
         // update with whatever we have already accumulated then scroll
         AndFlmsg.mHandler.post(AndFlmsg.addtomodem);
-
-        // JD Initialize the MODE UP button
-        myButton = findViewById(R.id.button_modeUP);
-        setTextSize(myButton);
-        myButton.setOnClickListener(new OnClickListener() {
-            public void onClick(View v) {
-                try {
-                    if (!Processor.ReceivingForm && ProcessorON && !Processor.TXActive && Modem.modemState == Modem.RXMODEMRUNNING) {
-                        Processor.TxModem = Processor.RxModem = Modem.getModeUpDown(Processor.RxModem, +1);
-                        Modem.changemode(Processor.RxModem); // to make the changes effective
-                        saveLastModeUsed(Processor.RxModem);
-
-                        int mIndex = Modem.getModeIndexFullList(Processor.RxModem);
-                        loggingclass.writelog("Current mode: " + Modem.modemCapListString[mIndex], null);
-                    }
-                }
-                // JD fix this catch action
-                catch (Exception ex) {
-                    loggingclass.writelog("Button Execution error: " + ex.getMessage(), null);
-                }
-            }
-        });
-
-        // JD Initialize the MODE DOWN button
-        myButton = findViewById(R.id.button_modeDOWN);
-        setTextSize(myButton);
-        myButton.setOnClickListener(new OnClickListener() {
-            public void onClick(View v) {
-                try {
-                    if (!Processor.ReceivingForm && ProcessorON && !Processor.TXActive && Modem.modemState == Modem.RXMODEMRUNNING) {
-                        Processor.TxModem = Processor.RxModem = Modem.getModeUpDown(Processor.RxModem, -1);
-                        Modem.changemode(Processor.RxModem); // to make the changes effective
-                        saveLastModeUsed(Processor.RxModem);
-
-                        int mIndex = Modem.getModeIndexFullList(Processor.RxModem);
-                        loggingclass.writelog("Current mode: " + Modem.modemCapListString[mIndex], null);
-                    }
-                }
-                // JD fix this catch action
-                catch (Exception ex) {
-                    loggingclass.writelog("Button Execution error: " + ex.getMessage(), null);
-                }
-            }
-        });
     }
 }

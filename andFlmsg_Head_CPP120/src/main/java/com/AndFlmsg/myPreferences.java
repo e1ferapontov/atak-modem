@@ -22,13 +22,35 @@ package com.AndFlmsg;
 import android.app.Activity;
 import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.preference.CheckBoxPreference;
+import android.preference.ListPreference;
 import android.preference.Preference;
 import android.preference.PreferenceActivity;
-import android.preference.PreferenceCategory;
 
 
 public class myPreferences extends PreferenceActivity {
+
+    protected static void setListPreferenceData(ListPreference lp) {
+        CharSequence[] entries = new CharSequence[Modem.numModes];
+        CharSequence[] entryValues = new CharSequence[Modem.numModes];
+
+        for (int i = 0; i < Modem.numModes; i++) {
+            entryValues[i] = String.valueOf(i);
+            entries[i] = Modem.modemCapListString[i];
+        }
+
+        lp.setEntries(entries);
+        lp.setEntryValues(entryValues);
+
+        if (lp.getValue() == null) {
+            int defaultModeCode = Modem.getMode("8PSK1000");
+            int savedModeCode = config.getPreferenceI("LASTMODEUSED", defaultModeCode);
+
+            int newModeCode = Modem.getModeIndex(savedModeCode);
+
+            lp.setValue(String.valueOf(newModeCode));
+        }
+        lp.setSummary(lp.getEntry());
+    }
 
     @Override
     protected void onCreate(final Bundle savedInstanceState) {
@@ -49,18 +71,42 @@ public class myPreferences extends PreferenceActivity {
             }
         });
 
-        //Now add the dynamic part of the preferences (mode list etc...).
-        PreferenceCategory targetCategory = (PreferenceCategory) findPreference("listofmodestouse");
+        // Modem digital modes list
+        final ListPreference modemListPreference = (ListPreference) findPreference("mode");
 
-        for (int i = 0; i < Modem.numModes; i++) {
-            //create one check box for each setting you need
-            CheckBoxPreference checkBoxPreference = new CheckBoxPreference(this);
-            //make sure each key is unique
-            checkBoxPreference.setKey("USE" + Modem.modemCapListString[i]);
-            checkBoxPreference.setTitle("Use " + Modem.modemCapListString[i]);
-            //checkBoxPreference.setChecked(true);
-            targetCategory.addPreference(checkBoxPreference);
-        }
+        setListPreferenceData(modemListPreference);
+
+        modemListPreference.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
+            @Override
+            public boolean onPreferenceChange(Preference preference, Object newValue) {
+                ListPreference lp = (ListPreference) preference;
+                String oldValue = lp.getValue();
+
+                if (newValue != oldValue) {
+                    if (AndFlmsg.ProcessorON && !Processor.TXActive && Modem.modemState == Modem.RXMODEMRUNNING) {
+                        Modem.changemode(Integer.parseInt((String) newValue));
+
+                        lp.setSummary(lp.getEntries()[Integer.parseInt((String) newValue)]);
+
+
+                        int mIndex = Modem.getModeIndexFullList(Integer.parseInt((String) newValue));
+                        loggingclass.writelog("Current mode: " + Modem.modemCapListString[mIndex], null);
+
+                        return true;
+                    }
+                }
+
+                return false;
+            }
+        });
+
+        modemListPreference.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
+            @Override
+            public boolean onPreferenceClick(Preference preference) {
+                setListPreferenceData(modemListPreference);
+                return false;
+            }
+        });
 
     }
 

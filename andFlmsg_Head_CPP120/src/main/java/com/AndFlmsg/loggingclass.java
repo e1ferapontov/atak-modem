@@ -3,7 +3,7 @@ package com.AndFlmsg;
 import android.util.Log;
 
 public class loggingclass {
-    private static String Application = "";
+    private static String Application = "AndFlmsg";
 
     public loggingclass(String app) {
         Application = app;

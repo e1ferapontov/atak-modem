@@ -26,3 +26,4 @@ hs_err_pid*
 /.gradle
 /andFlmsg_Head_CPP120/.externalNativeBuild
 /andFlmsg_Head_CPP120/build
+/build

@@ -11,22 +11,20 @@
             android:key="CALL"
             android:title="@string/pref_MyCallsign" />
 
-        <CheckBoxPreference
-            android:defaultValue="false"
-            android:key="USEMODELIST"
-            android:title="@string/pref_UseCustomListOfModes" />
-
-        <PreferenceScreen
-            android:dependency="USEMODELIST"
-            android:key="modelistPS"
-            android:title="@string/pref_ModeList">
-            <PreferenceCategory android:key="listofmodestouse" />
-        </PreferenceScreen>
+        <ListPreference
+            android:key="mode"
+            android:title="Modem mode" />
     </PreferenceCategory>
 
     <PreferenceCategory
         android:key="modemgeneralCAT"
         android:title="Modem settings">
+        <CheckBoxPreference
+            android:defaultValue="false"
+            android:key="SLOWCPU"
+            android:summary="@string/pref_SaveCpuResources"
+            android:title="@string/pref_SlowCpu" />
+
         <ListPreference
             android:defaultValue="10"
             android:entries="@array/volume"
@@ -41,12 +39,6 @@
             android:key="AFREQUENCY"
             android:summary="@string/pref_AudioFrequency"
             android:title="@string/pref_AudioFrequency" />
-
-        <CheckBoxPreference
-            android:defaultValue="false"
-            android:key="SLOWCPU"
-            android:summary="@string/pref_SaveCpuResources"
-            android:title="@string/pref_SlowCpu" />
     </PreferenceCategory>
 
 

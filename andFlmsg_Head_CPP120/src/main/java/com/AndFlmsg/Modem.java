@@ -401,6 +401,13 @@ public class Modem {
     static void changemode(int newMode) {
         //Stop the modem receiving side to prevent using the wrong values
         pauseRxModem();
+
+        int newModemMode = customModeListInt[getModeIndex(newMode)];
+
+        loggingclass.writelog("newMode " + newMode, null);
+        loggingclass.writelog("newModemMode " + newModemMode, null);
+        Processor.TxModem = Processor.RxModem = newModemMode;
+        AndFlmsg.saveLastModeUsed(newModemMode);
         //Restart modem reception
         unPauseRxModem();
 
@@ -443,8 +450,7 @@ public class Modem {
             case 0:
                 break; // do nothing
             case '[':
-                if (Processor.ReceivingForm ||
-                        FirstBracketReceived) {
+                if (FirstBracketReceived) {
                     BlockString += inChar;
                 } else {
                     if (!FirstBracketReceived) {
@@ -455,16 +461,14 @@ public class Modem {
                 break;
             case 10: //Line Feed
                 MonitorString += "\n";
-                if (Processor.ReceivingForm ||
-                        FirstBracketReceived) {
+                if (FirstBracketReceived) {
                     BlockString += inChar;
                 }
                 break;
             case 13: //ignore Carriage Returns
                 break;
             default:
-                if (Processor.ReceivingForm ||
-                        FirstBracketReceived) {
+                if (FirstBracketReceived) {
                     BlockString += inChar;
                 }
                 break;
@@ -472,7 +476,6 @@ public class Modem {
         //Reset if header not found within
         //  1000 charaters of first bracket
         if (FirstBracketReceived &&
-                !Processor.ReceivingForm &&
                 BlockString.length() > 1000) {
             BlockString = BlockString.substring(900);
             if (!BlockString.contains("]")) FirstBracketReceived = false;
@@ -480,11 +483,9 @@ public class Modem {
         //Reset if end marker not found within
         // 100,000 charaters of start (increased from 30,000 as new 8PSK modes allows mode data within a given period of time).
         //to-do: if found crc but not wrap end, process anyway
-        if (Processor.ReceivingForm &&
-                BlockString.length() > 100000) {
+        if (BlockString.length() > 100000) {
             Processor.CrcString = "";
             Processor.FileNameString = "";
-            Processor.ReceivingForm = false;
             FirstBracketReceived = false;
         }
         if (inChar > 31) //Display non-control characters
