@@ -194,7 +194,6 @@ public class Modem {
         return j;
     }
 
-
     //Receives a modem code. Returns the modem index in the array of ALL modes supplied by the C++ modem
     public static int getModeIndexFullList(int mcode) {
         int j = -1;
@@ -208,16 +207,12 @@ public class Modem {
         return j;
     }
 
-
-    //Return the new mode code or the same if it hits the end of list either way
-    public static int getModeUpDown(int currentMode, int increment) {
-        //Find position of current mode
-        int j = getModeIndex(currentMode);
-        j += increment;
-        //Circular list
-        if (j < 0) j = customNumModes - 1;
-        if (j >= customNumModes) j = 0;
-        return customModeListInt[j];
+    //Save last mode used for next app start
+    private static void saveLastModeUsed(int modemCode) {
+        SharedPreferences.Editor editor = AndFlmsg.mysp.edit();
+        editor.putString("LASTMODEUSED", Integer.toString(modemCode));
+        // Commit the edits!
+        editor.commit();
     }
 
 
@@ -250,6 +245,25 @@ public class Modem {
         }
     }
 
+    private static void processRsid(short[] so8K, int numSamples8K, float[] so12K, int size12Kbuf) {
+        //Re-sample to 11025Hz for RSID, THOR and MFSK modems
+        int numSamples12K = SampleRateConversion.Process(so8K, numSamples8K, so12K, size12Kbuf);
+        //Conditional Rx RSID (keep the FFT processing for the waterfall)
+        String rsidReturnedString = RsidCModemReceive(so12K, numSamples12K, rxRsidOn);
+        //As we flushed the RX pipe automatically, we need to process any left-over characters from the previous modem
+        //Processing of the characters received
+        for (int i = 0; i < rsidReturnedString.length(); i++) {
+            processRxChar(rsidReturnedString.charAt(i));
+        }
+
+        if (rsidReturnedString.contains("\nRSID:")) {
+            //We have a new modem and/or centre frequency
+            frequency = getCurrentFrequency();
+            Processor.RxModem = getCurrentMode();
+            saveLastModeUsed(Processor.RxModem);
+        }
+    }
+
 
     public static void startmodem() {
         modemThreadOn = true;
@@ -260,12 +274,10 @@ public class Modem {
                 Process.setThreadPriority(Process.THREAD_PRIORITY_FOREGROUND);
 
                 while (modemThreadOn) {
-
                     //Save Environment for this thread so it can call back
                     // Java methods while in C++
                     Modem.saveEnv();
 
-                    String rsidReturnedString;
                     String modemReturnedString;
                     modemState = RXMODEMSTARTING;
                     double startproctime = 0;
@@ -303,42 +315,25 @@ public class Modem {
                     while (RxON) {
                         endproctime = System.currentTimeMillis();
                         double buffertime = (double) numSamples8K / 8000.0 * 1000.0; //in milliseconds
-                        if (numSamples8K > 0)
+                        if (numSamples8K > 0) {
                             Processor.cpuload = (int) ((endproctime - startproctime) / buffertime * 100);
-                        if (Processor.cpuload > 100) Processor.cpuload = 100;
+                        }
+                        if (Processor.cpuload > 100) {
+                            Processor.cpuload = 100;
+                        }
                         AndFlmsg.mHandler.post(AndFlmsg.updatecpuload);
-                        //Android try faster mode changes by having a smaller buffer to process						numSamples8K = audiorecorder.read(so8K, 0, 8000/4); //process only part of the buffer to avoid lumpy processing
+                        //Android try faster mode changes by having a smaller buffer to process
                         numSamples8K = audiorecorder.read(so8K, 0, 8000 / 8); //process only part of the buffer to avoid lumpy processing
                         if (numSamples8K > 0) {
                             modemState = RXMODEMRUNNING;
                             startproctime = System.currentTimeMillis();
                             //Process only if Rx is ON, otherwise discard (we have already decided to TX)
                             if (RxON) {
-                                if (rxRsidOn || (AndFlmsg.currentview == AndFlmsg.MODEMVIEWwithWF)) {
-                                    //Re-sample to 11025Hz for RSID, THOR and MFSK modems
-                                    int numSamples12K = SampleRateConversion.Process(so8K, numSamples8K, so12K, size12Kbuf);
-                                    //Conditional Rx RSID (keep the FFT processing for the waterfall)
-                                    rsidReturnedString = RsidCModemReceive(so12K, numSamples12K, rxRsidOn);
-                                    //As we flushed the RX pipe automatically, we need to process
-                                    // any left-over characters from the previous modem
-                                    //Processing of the characters received
-                                    for (int i = 0; i < rsidReturnedString.length(); i++) {
-                                        processRxChar(rsidReturnedString.charAt(i));
-                                    }
-                                } else {
-                                    rsidReturnedString = "";
-                                }
                                 if (rxRsidOn) {
-                                    if (rsidReturnedString.contains("\nRSID:")) {
-                                        //We have a new modem and/or centre frequency
-                                        //Update the RSID waterfall frequency too
-                                        frequency = getCurrentFrequency();
-                                        Processor.RxModem = getCurrentMode();
-                                        AndFlmsg.saveLastModeUsed(Processor.RxModem);
-                                    }
+                                    processRsid(so8K, numSamples8K, so12K, size12Kbuf);
                                 }
                                 //Sets the latest squelch level for the modem to use
-                                setSquelchLevel(squelch);
+                                setSquelch(squelch);
                                 //Then process the RX data
                                 modemReturnedString = rxCProcess(so8K, numSamples8K);
                                 //Retreive latest signal quality for display
@@ -349,13 +344,13 @@ public class Modem {
                                     processRxChar(modemReturnedString.charAt(i));
                                 }
                             }
-                            //Post to monitor (Modem) window after each buffer processing
+                            //Post to TermWindow (Modem) window after each buffer processing
                             //Add TX frame too if present
                             if (Modem.MonitorString.length() > 0 || Processor.TXmonitor.length() > 0) {
-                                Processor.monitor += Modem.MonitorString + Processor.TXmonitor;
+                                Processor.TermWindow += Modem.MonitorString + Processor.TXmonitor;
                                 Processor.TXmonitor = "";
                                 Modem.MonitorString = "";
-                                AndFlmsg.mHandler.post(AndFlmsg.addtomodem);
+                                AndFlmsg.mHandler.post(AndFlmsg.addtoterminal);
                             }
                         }
                     }
@@ -407,7 +402,7 @@ public class Modem {
         loggingclass.writelog("newMode " + newMode, null);
         loggingclass.writelog("newModemMode " + newModemMode, null);
         Processor.TxModem = Processor.RxModem = newModemMode;
-        AndFlmsg.saveLastModeUsed(newModemMode);
+        saveLastModeUsed(newModemMode);
         //Restart modem reception
         unPauseRxModem();
 
@@ -425,27 +420,28 @@ public class Modem {
         squelch = AndFlmsg.mysp.getFloat("SQUELCHVALUE", (float) 20.0);
     }
 
-    /**
-     * @param squelchdiff the delta to add to squelch
-     */
-    public static void AddtoSquelch(double squelchdiff) {
-        squelch += (squelch > 10) ? squelchdiff : squelchdiff / 2;
-        if (squelch < 0) squelch = 0;
-        if (squelch > 100) squelch = 100;
-        //store value into preferences
+    public static void setSquelch(double newSql) {
+        double assignedSqlValue;
+
+        if (newSql < 0) {
+            assignedSqlValue = 0;
+        } else if (newSql > 100) {
+            assignedSqlValue = 100;
+        } else {
+            assignedSqlValue = newSql;
+        }
+
+        squelch = assignedSqlValue;
+
+        // store value into preferences
         SharedPreferences.Editor editor = AndFlmsg.mysp.edit();
-        editor.putFloat("SQUELCHVALUE", (float) squelch);
-        // Commit the edits!
+        editor.putFloat("SQUELCHVALUE", (float) assignedSqlValue);
         editor.commit();
+        // pass to C++
+        setSquelchLevel(assignedSqlValue);
     }
 
     public static void processRxChar(char inChar) {
-        //For UTF-8 let all characters through
-        //if (inChar > 127) {
-        // todo: unicode encoding
-        //    inChar = 0;
-        // }
-
         switch (inChar) {
             case 0:
                 break; // do nothing
@@ -472,13 +468,15 @@ public class Modem {
                     BlockString += inChar;
                 }
                 break;
-        }    // end switch
+        }
         //Reset if header not found within
         //  1000 charaters of first bracket
-        if (FirstBracketReceived &&
-                BlockString.length() > 1000) {
+        if (FirstBracketReceived && BlockString.length() > 1000) {
             BlockString = BlockString.substring(900);
-            if (!BlockString.contains("]")) FirstBracketReceived = false;
+
+            if (!BlockString.contains("]")) {
+                FirstBracketReceived = false;
+            }
         }
         //Reset if end marker not found within
         // 100,000 charaters of start (increased from 30,000 as new 8PSK modes allows mode data within a given period of time).
@@ -488,50 +486,28 @@ public class Modem {
             Processor.FileNameString = "";
             FirstBracketReceived = false;
         }
-        if (inChar > 31) //Display non-control characters
-        {
+        //Display non-control characters
+        if (inChar > 31) {
             MonitorString += inChar;
         }
     }
 
     //In a separate thread so that the UI thread is not blocked during TX
-    public static void txData(String sendingFolder, String sendingFileName, String Sendline,
-                              int numberOfImagesToTx,
-                              int pictureTxSpeed, Boolean pictureColour, String pictureTxMode) {
-        Runnable TxRun = new TxThread(sendingFolder, sendingFileName, Sendline,
-                numberOfImagesToTx,
-                pictureTxSpeed, pictureColour, pictureTxMode);
-        Sendline = "";
-        new Thread(TxRun).start();
+    public static void txData(String Sendline) {
+        new Thread(new TxThread(Sendline)).start();
         pauseRxModem();
     }
 
 
     public static class TxThread implements Runnable {
         private String txSendline = "";
-        private String txFolder = "";
-        private String txFileName = "";
-        private int txNumberOfImagesToTx = 0;
-        private final int txPictureTxSpeed;
-        private final int txPictureColour;
-        private final String txPictureTxMode;
 
-        public TxThread(String sendingFolder, String sendingFileName, String Sendline,
-                        int numberOfImagesToTx,
-                        int pictureTxSpeed, Boolean pictureColour, String pictureTxMode) {
-            txFolder = sendingFolder;
-            txFileName = sendingFileName;
+        public TxThread(String Sendline) {
             txSendline = Sendline;
-            txNumberOfImagesToTx = numberOfImagesToTx;
-            txPictureTxSpeed = pictureTxSpeed;
-            txPictureColour = pictureColour ? -1 : 0; //Leave option open for further variations
-            txPictureTxMode = pictureTxMode;
         }
 
         public void run() {
-
             if (txSendline.length() > 0 & !Processor.TXActive) {
-
                 if (Processor.DCDthrow == 0) {
                     try {
                         // TODO: DEBUG

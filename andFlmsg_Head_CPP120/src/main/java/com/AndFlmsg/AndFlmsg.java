@@ -104,8 +104,6 @@ public class AndFlmsg extends AppCompatActivity {
     // Layout Views
     private static TextView myTermTV;
     private static ScrollView myTermSC;
-    private static TextView myModemTV;
-    private static ScrollView myModemSC;
 
     private static String savedTextMessage = "";
 
@@ -113,7 +111,6 @@ public class AndFlmsg extends AppCompatActivity {
     private Button myButton;
 
     public static String TerminalBuffer = "";
-    public static String ModemBuffer = "";
 
     // Member object for processing of Rx and Tx
     // Can be stopped (i.e no RX) to save battery and allow Android to reclaim
@@ -134,8 +131,7 @@ public class AndFlmsg extends AppCompatActivity {
     // Runnable for updating the signal quality bar in Modem Window
     public static final Runnable updatesignalquality = new Runnable() {
         public void run() {
-            if ((SignalQuality != null)
-                    && ((currentview == MODEMVIEWnoWF) || (currentview == MODEMVIEWwithWF))) {
+            if ((SignalQuality != null) && ((currentview == MODEMVIEWnoWF) || (currentview == MODEMVIEWwithWF))) {
                 SignalQuality.setProgress((int) Modem.metric);
                 SignalQuality.setSecondaryProgress((int) Modem.squelch);
             }
@@ -145,8 +141,7 @@ public class AndFlmsg extends AppCompatActivity {
     // Runnable for updating the CPU load bar in Modem Window
     public static final Runnable updatecpuload = new Runnable() {
         public void run() {
-            if ((CpuLoad != null)
-                    && ((currentview == MODEMVIEWnoWF) || (currentview == MODEMVIEWwithWF))) {
+            if ((CpuLoad != null) && ((currentview == MODEMVIEWnoWF) || (currentview == MODEMVIEWwithWF))) {
                 CpuLoad.setProgress(Processor.cpuload);
             }
         }
@@ -155,47 +150,19 @@ public class AndFlmsg extends AppCompatActivity {
     // Create runnable for posting to terminal window
     public static final Runnable addtoterminal = new Runnable() {
         public void run() {
-            // myTV.setText(Processor.TermWindow);
             if (myTermTV != null) {
                 //Update done with setText below
-                //myTermTV.append(Processor.TermWindow);
                 TerminalBuffer += Processor.TermWindow;
                 Processor.TermWindow = "";
-                if (TerminalBuffer.length() > 10000)
+                if (TerminalBuffer.length() > 10000) {
                     TerminalBuffer = TerminalBuffer.substring(2000);
+                }
                 myTermTV.setText(TerminalBuffer);
                 // Then scroll to the bottom
                 if (myTermSC != null) {
                     myTermSC.post(new Runnable() {
                         public void run() {
                             myTermSC.fullScroll(View.FOCUS_DOWN);
-                        }
-                    });
-                }
-            }
-        }
-    };
-
-    // Create runnable for posting to modem window
-    public static final Runnable addtomodem = new Runnable() {
-        public void run() {
-            // myTV.setText(Processor.TermWindow);
-            if (myModemTV != null) {
-                //Only add the size limited ModemBuffer otherwise we overload the textview display
-                //myModemTV.append(Processor.monitor);
-                ModemBuffer += Processor.monitor;
-                Processor.monitor = "";
-                //Noted a slowing down of Gui after a large number of characters are received
-                //Reduced the buffer size if (ModemBuffer.length() > 60000)
-                if (ModemBuffer.length() > 10000)
-                    ModemBuffer = ModemBuffer.substring(5000);
-                //Reassign only the size limited buffer
-                myModemTV.setText(ModemBuffer);
-                // Then scroll to the bottom
-                if (myModemSC != null) {
-                    myModemSC.post(new Runnable() {
-                        public void run() {
-                            myModemSC.fullScroll(View.FOCUS_DOWN);
                         }
                     });
                 }
@@ -370,7 +337,7 @@ public class AndFlmsg extends AppCompatActivity {
         }
 
         // We start with the Terminal screen
-        displayTerminal(NORMAL);
+        displayTerminal();
     }
 
     /**
@@ -557,59 +524,6 @@ public class AndFlmsg extends AppCompatActivity {
         return true;
     }
 
-    public static void screenAnimation(ViewGroup panel, int screenAnimation) {
-
-        AnimationSet set = new AnimationSet(true);
-
-        Animation animation = new AlphaAnimation(0.0f, 1.0f);
-        animation.setDuration(100);
-        set.addAnimation(animation);
-
-        switch (screenAnimation) {
-
-            case NORMAL:
-                return;
-            // break;
-
-            case RIGHT:
-                animation = new TranslateAnimation(Animation.RELATIVE_TO_SELF,
-                        -1.0f, Animation.RELATIVE_TO_SELF, 0.0f,
-                        Animation.RELATIVE_TO_SELF, 0.0f,
-                        Animation.RELATIVE_TO_SELF, 0.0f);
-                break;
-            case LEFT:
-                animation = new TranslateAnimation(Animation.RELATIVE_TO_SELF,
-                        1.0f, Animation.RELATIVE_TO_SELF, 0.0f,
-                        Animation.RELATIVE_TO_SELF, 0.0f,
-                        Animation.RELATIVE_TO_SELF, 0.0f);
-                break;
-
-            case TOP:
-                animation = new TranslateAnimation(Animation.RELATIVE_TO_SELF,
-                        0.0f, Animation.RELATIVE_TO_SELF, 0.0f,
-                        Animation.RELATIVE_TO_SELF, -1.0f,
-                        Animation.RELATIVE_TO_SELF, 0.0f);
-                break;
-
-            case BOTTOM:
-                animation = new TranslateAnimation(Animation.RELATIVE_TO_SELF,
-                        0.0f, Animation.RELATIVE_TO_SELF, 0.0f,
-                        Animation.RELATIVE_TO_SELF, 1.0f,
-                        Animation.RELATIVE_TO_SELF, 0.0f);
-                break;
-
-        }
-
-        animation.setDuration(200);
-        set.addAnimation(animation);
-
-        LayoutAnimationController controller = new LayoutAnimationController(
-                set, 0.25f);
-        if (panel != null) {
-            panel.setLayoutAnimation(controller);
-        }
-    }
-
 
     //Set the button text size based on user's preferences
     private void setTextSize(Button thisButton) {
@@ -621,12 +535,10 @@ public class AndFlmsg extends AppCompatActivity {
 
 
     // Display the Terminal layout and associate it's buttons
-    private void displayTerminal(int screenMovement) {
+    private void displayTerminal() {
         // Change layout and remember which one we are on
         currentview = TERMVIEW;
         setContentView(R.layout.terminal);
-        screenAnimation((ViewGroup) findViewById(R.id.termscreen),
-                screenMovement);
         myTermTV = findViewById(R.id.terminalview);
         myTermTV.setHorizontallyScrolling(false);
         myTermTV.setTextSize(16);
@@ -689,17 +601,8 @@ public class AndFlmsg extends AppCompatActivity {
                 view.setText("");
                 savedTextMessage = "";
                 Processor.TX_Text += (intext + "\n");
-                Modem.txData("", "", intext + "\n", 0, 0, false, "");
+                Modem.txData(intext + "\n");
             }
         });
-    }
-
-    //Save last mode used for next app start
-    public static void saveLastModeUsed(int modemCode) {
-        SharedPreferences.Editor editor = AndFlmsg.mysp.edit();
-        editor.putString("LASTMODEUSED", Integer.toString(modemCode));
-        // Commit the edits!
-        editor.commit();
-
     }
 }

@@ -44,7 +44,6 @@ public class Processor extends Service {
     static int RxModem = Modem.customModeListInt[savedModeIndex];
 
     // globals to pass info to gui windows
-    static String monitor = "";
     static String TXmonitor = "";
     static String TermWindow = "";
     static int cpuload;
@@ -82,8 +81,6 @@ public class Processor extends Service {
 
     @Override
     public void onCreate() {
-
-        loggingclass.writelog("awdawdawd modem" + TxModem, null);
         //Save Environment if we need to access Java code/variables from C++
         saveEnv();
 
@@ -100,7 +97,6 @@ public class Processor extends Service {
         Modem.reset();
 
         //Make sure the display strings are blank
-        Processor.monitor = "";
         Processor.TXmonitor = "";
         Processor.TermWindow = "";
     }
