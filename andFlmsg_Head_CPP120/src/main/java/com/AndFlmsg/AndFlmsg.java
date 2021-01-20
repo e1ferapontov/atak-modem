@@ -208,78 +208,6 @@ public class AndFlmsg extends AppCompatActivity {
         Toast.makeText(this, getString(R.string.txt_PleaseUseMenuExit), Toast.LENGTH_SHORT).show();
     }
 
-    @Override
-    public boolean dispatchTouchEvent(MotionEvent ev) {
-        boolean handled = super.dispatchTouchEvent(ev);
-        handled = mGesture.onTouchEvent(ev);
-        return handled;
-    }
-
-    private final SimpleOnGestureListener mOnGesture = new GestureDetector.SimpleOnGestureListener() {
-        private float xDistance, yDistance, lastX, lastY;
-
-        @Override
-        public boolean onDown(MotionEvent e) {
-            xDistance = yDistance = 0f;
-            lastX = e.getX();
-            lastY = e.getY();
-            return false;
-        }
-
-
-        @Override
-        public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY) {
-            final float curX = e2.getX();
-            final float curY = e2.getY();
-            xDistance += (curX - lastX);
-            yDistance += (curY - lastY);
-            lastX = curX;
-            lastY = curY;
-            if (Math.abs(xDistance) > Math.abs(yDistance) && Math.abs(velocityX) > 1500) {
-                navigateScreens((int) xDistance);
-                return false;
-            }
-            return true;
-        }
-
-        @Override
-        public boolean onScroll(MotionEvent e1, MotionEvent e2,
-                                float distanceX, float distanceY) {
-            return false;
-        }
-    };
-
-
-    // Swipe (fling) handling to move from screen to screen
-    private void navigateScreens(int flingDirection) {
-        // Navigate between screens by gesture (on top of menu button acces)
-        if (flingDirection > 0) { // swipe/fling right
-            switch (currentview) {
-                case TERMVIEW:
-                    displayModem(RIGHT);
-                    break;
-
-                case MODEMVIEWnoWF:
-                case MODEMVIEWwithWF:
-                default:
-                    displayTerminal(RIGHT); // Just in case
-
-            }
-        } else { // swipe/fling left
-            switch (currentview) {
-                case TERMVIEW:
-                    displayModem(LEFT);
-                    break;
-
-                case MODEMVIEWnoWF:
-                case MODEMVIEWwithWF:
-                default:
-                    displayTerminal(LEFT); // Just in case
-
-            }
-        }
-    }
-
 
     public static boolean readLogsPermit = false;
     public static boolean writeExtStoragePermit = false;
@@ -429,9 +357,6 @@ public class AndFlmsg extends AppCompatActivity {
         //Set the Activity's Theme
         setTheme(R.style.andFlmsgStandard);
 
-        // Get new gesture detector for flings over scrollviews
-        mGesture = new GestureDetector(this, mOnGesture);
-
         // Get the RSID flags from stored preferences
         Modem.txRsidOn = config.getPreferenceB("TXRSID", false);
         Modem.rxRsidOn = config.getPreferenceB("RXRSID", false);
@@ -506,12 +431,6 @@ public class AndFlmsg extends AppCompatActivity {
 
             startService(new Intent(AndFlmsg.this, Processor.class));
             ProcessorON = true;
-
-            // Finally, if we were on the modem screen AND we come back to it,
-            // then redisplay in case we changed the waterfall frequency
-            if (currentview == MODEMVIEWwithWF) {
-                displayModem(NORMAL);
-            }
         } else { // start if not ON yet AND we haven't paused the modem manually
             if (!ProcessorON && !modemPaused) {
                 String NOTIFICATION_CHANNEL_ID = "com.AndFlmsg";
@@ -752,6 +671,12 @@ public class AndFlmsg extends AppCompatActivity {
 
         });
 
+        // initialise CPU load bar display
+        CpuLoad = findViewById(R.id.cpu_load);
+
+        // initialise squelch and signal quality dislay
+        SignalQuality = findViewById(R.id.signal_quality);
+
         // JD Initialize the Send Text button (commands in connected mode)
         myButton = findViewById(R.id.button_sendtext);
         setTextSize(myButton);
@@ -776,29 +701,5 @@ public class AndFlmsg extends AppCompatActivity {
         // Commit the edits!
         editor.commit();
 
-    }
-
-    // Display the Modem layout and associate it's buttons
-    private void displayModem(int screenAnimation) {
-        currentview = MODEMVIEWnoWF;
-        setContentView(R.layout.modemwithoutwf);
-        screenAnimation((ViewGroup) findViewById(R.id.modemnwfscreen),
-                screenAnimation);
-
-        myModemTV = findViewById(R.id.modemview);
-        myModemTV.setHorizontallyScrolling(false);
-        myModemTV.setTextSize(16);
-
-        // initialise CPU load bar display
-        CpuLoad = findViewById(R.id.cpu_load);
-
-        // initialise squelch and signal quality dislay
-        SignalQuality = findViewById(R.id.signal_quality);
-
-        // Reset modem display in case it was blanked out by a new oncreate call
-        myModemTV.setText(ModemBuffer);
-        myModemSC = findViewById(R.id.modemscrollview);
-        // update with whatever we have already accumulated then scroll
-        AndFlmsg.mHandler.post(AndFlmsg.addtomodem);
     }
 }
