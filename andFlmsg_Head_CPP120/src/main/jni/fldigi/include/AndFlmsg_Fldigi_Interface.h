@@ -13,7 +13,6 @@ extern void txModulate(double *buffer, int len);
 extern void put_rx_char(int receivedChar);
 extern void put_echo_char(unsigned int txedChar);
 extern int  get_tx_char();
-extern bool getNewAmplReady();
 extern string getPreferenceS2(string preferenceString, string defaultValue);
 extern int getPreferenceI(string preferenceString, int defaultValue);
 extern double getPreferenceD(string preferenceString, double defaultValue);

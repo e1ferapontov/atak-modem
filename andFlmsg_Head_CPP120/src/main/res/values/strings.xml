@@ -16,6 +16,7 @@
     <string name="pref_SaveCpuResources">Save CPU Resources</string>
     <string name="pref_SlowCpu">Slow CPU</string>
     <string name="pref_UseCustomListOfModes">Use Custom List Of Modes</string>
+    <string name="pref_Squelch">Squelch level</string>
 
     <string name="txt_AreYouSureExit">Are you sure you want to Exit?</string>
     <string name="txt_CPU">CPU</string>

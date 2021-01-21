@@ -16,7 +16,7 @@ public class loggingclass {
             Log.e(Application, msg, e);
         }
 
-        Processor.TermWindow += (msg + "\n");
+        ModemService.TermWindow += (msg + "\n");
         AndFlmsg.mHandler.post(AndFlmsg.addtoterminal);
 
     }

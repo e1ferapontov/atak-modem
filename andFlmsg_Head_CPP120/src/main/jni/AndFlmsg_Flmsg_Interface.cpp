@@ -197,7 +197,7 @@ extern string setPreferenceS2(string preferenceString, string newValue) {
 
 //Save environment if we need to call the preference methods in Java
 extern "C" JNIEXPORT void
-Java_com_AndFlmsg_Processor_saveEnv( JNIEnv* env, jobject thishere)
+Java_com_AndFlmsg_ModemService_saveEnv(JNIEnv* env, jobject thishere)
 {
 	gEnv2 = env;
 	gJobject2 = thishere;

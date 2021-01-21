@@ -11,6 +11,16 @@
             android:key="CALL"
             android:title="@string/pref_MyCallsign" />
 
+        <EditTextPreference
+            android:dialogTitle="Set the squelch level (MIN 0, MAX 100): "
+            android:inputType="number"
+            android:summary="doesn't work yet"
+
+            android:defaultValue="20"
+            android:key="SQL"
+            android:hint="20"
+            android:title="@string/pref_Squelch" />
+
         <ListPreference
             android:key="mode"
             android:title="Modem mode" />

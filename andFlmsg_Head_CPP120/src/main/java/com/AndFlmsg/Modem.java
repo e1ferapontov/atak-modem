@@ -27,7 +27,7 @@ import android.os.Process;
 import java.util.HashMap;
 
 public class Modem {
-
+    public static final int DEFAULT_MODEM_CODE = 90; // 8PSK1000
 
     public static final int RXMODEMIDLE = 0;
     public static final int RXMODEMSTARTING = 1;
@@ -42,9 +42,6 @@ public class Modem {
     public static int NumberOfOverruns = 0;
     public static String MonitorString = "";
     public static double frequency = 1500.0;
-    //Semaphore for waterfall (new array of amplitudes needed for display)
-    //Is now also accessed from the c++ native side in rsid.cxx
-    public static boolean newAmplReady = false;
     public static boolean stopTX = false;
     // Modem modes
     public static HashMap<Integer, String> modemNamesByCode;
@@ -112,12 +109,20 @@ public class Modem {
 
     //Returns the modem code given a modem name (String)
     public static String getModemNameByCode(int modeCode) {
-        return modemNamesByCode.get(modeCode);
+        if (modemNamesByCode != null) {
+            return modemNamesByCode.get(modeCode);
+        }
+        // Returns default '8PSK1000'
+        return "8PSK1000";
     }
 
     //Receives a modem code. Returns the modem index in the array of ALL modes supplied by the C++ modem
     public static int getModemCodeByName(String modeName) {
-        return modemCodesByName.get(modeName);
+        if (modemCodesByName != null) {
+            return modemCodesByName.get(modeName);
+        }
+        // Returns default '8PSK1000'
+        return 90;
     }
 
     //Declaration of native classes
@@ -233,8 +238,8 @@ public class Modem {
         if (rsidReturnedString.contains("\nRSID:")) {
             //We have a new modem and/or centre frequency
             frequency = getCurrentFrequency();
-            Processor.RxModem = getCurrentMode();
-            saveLastModeUsed(Processor.RxModem);
+            ModemService.RxModem = getCurrentMode();
+            saveLastModeUsed(ModemService.RxModem);
         }
     }
 
@@ -267,14 +272,14 @@ public class Modem {
                         e.printStackTrace();
                     }
                     RxON = true;
-                    Processor.restartRxModem.drainPermits();
+                    ModemService.restartRxModem.drainPermits();
                     //Since the callback is not working, implement a while loop.
                     short[] so8K = new short[bufferSize];
                     int size12Kbuf = (int) ((bufferSize + 1) * 11025.0 / 8000.0);
                     //Android changed to float to match rsid.cxx code
                     float[] so12K = new float[size12Kbuf];
                     //Initialise modem
-                    createCModem(Processor.RxModem);
+                    createCModem(ModemService.RxModem);
                     //Initialize RX side of modem
                     boolean slowCpu = config.getPreferenceB("SLOWCPU", false);
                     setSlowCpuFlag(slowCpu);
@@ -290,10 +295,10 @@ public class Modem {
                         endproctime = System.currentTimeMillis();
                         double buffertime = (double) numSamples8K / 8000.0 * 1000.0; //in milliseconds
                         if (numSamples8K > 0) {
-                            Processor.cpuload = (int) ((endproctime - startproctime) / buffertime * 100);
+                            ModemService.cpuload = (int) ((endproctime - startproctime) / buffertime * 100);
                         }
-                        if (Processor.cpuload > 100) {
-                            Processor.cpuload = 100;
+                        if (ModemService.cpuload > 100) {
+                            ModemService.cpuload = 100;
                         }
                         AndFlmsg.mHandler.post(AndFlmsg.updatecpuload);
                         //Android try faster mode changes by having a smaller buffer to process
@@ -320,9 +325,9 @@ public class Modem {
                             }
                             //Post to TermWindow (Modem) window after each buffer processing
                             //Add TX frame too if present
-                            if (Modem.MonitorString.length() > 0 || Processor.TXmonitor.length() > 0) {
-                                Processor.TermWindow += Modem.MonitorString + Processor.TXmonitor;
-                                Processor.TXmonitor = "";
+                            if (Modem.MonitorString.length() > 0 || ModemService.TXmonitor.length() > 0) {
+                                ModemService.TermWindow += Modem.MonitorString + ModemService.TXmonitor;
+                                ModemService.TXmonitor = "";
                                 Modem.MonitorString = "";
                                 AndFlmsg.mHandler.post(AndFlmsg.addtoterminal);
                             }
@@ -344,9 +349,9 @@ public class Modem {
                         return;
                     }
                     //Now waits for a restart (or having this thread killed)
-                    Processor.restartRxModem.acquireUninterruptibly(1);
+                    ModemService.restartRxModem.acquireUninterruptibly(1);
                     //Make sure we don's have spare permits
-                    Processor.restartRxModem.drainPermits();
+                    ModemService.restartRxModem.drainPermits();
                 }
                 modemState = RXMODEMIDLE;
             }
@@ -364,14 +369,14 @@ public class Modem {
     }
 
     public static void unPauseRxModem() {
-        Processor.restartRxModem.release(1);
+        ModemService.restartRxModem.release(1);
     }
 
     static void changemode(int newModemCode) {
         //Stop the modem receiving side to prevent using the wrong values
         pauseRxModem();
 
-        Processor.TxModem = Processor.RxModem = newModemCode;
+        ModemService.TxModem = ModemService.RxModem = newModemCode;
         saveLastModeUsed(newModemCode);
         //Restart modem reception
         unPauseRxModem();
@@ -389,6 +394,7 @@ public class Modem {
         squelch = AndFlmsg.mysp.getFloat("SQUELCHVALUE", (float) 20.0);
     }
 
+    @SuppressLint("ApplySharedPref")
     public static void setSquelch(double newSql) {
         double assignedSqlValue;
 
@@ -451,8 +457,6 @@ public class Modem {
         // 100,000 charaters of start (increased from 30,000 as new 8PSK modes allows mode data within a given period of time).
         //to-do: if found crc but not wrap end, process anyway
         if (BlockString.length() > 100000) {
-            Processor.CrcString = "";
-            Processor.FileNameString = "";
             FirstBracketReceived = false;
         }
         //Display non-control characters
@@ -476,80 +480,77 @@ public class Modem {
         }
 
         public void run() {
-            if (txSendline.length() > 0 & !Processor.TXActive) {
-                if (Processor.DCDthrow == 0) {
+            if (txSendline.length() > 0 & !ModemService.TXActive) {
+                try {
+                    // TODO: DEBUG
+                    long startTime = System.nanoTime();
+
+                    //Reset the stop flag if it was ON
+                    Modem.stopTX = false;
+                    //Set flags to TXing
+                    ModemService.TXActive = true;
+                    //Stop the modem receiving side
+                    pauseRxModem();
+
+                    //Wait for the receiving side to be fully stopped???
+                    Thread.sleep(500);
+
+                    //Open and initialise the sound system
+                    int intSize = 4 * android.media.AudioTrack.getMinBufferSize(8000, AudioFormat.CHANNEL_OUT_MONO, AudioFormat.ENCODING_PCM_16BIT); //Android check the multiplier value for the buffer size
+
+                    txAt = new AudioTrack(AudioManager.STREAM_MUSIC, 8000, AudioFormat.CHANNEL_OUT_MONO, AudioFormat.ENCODING_PCM_16BIT, intSize, AudioTrack.MODE_STREAM);
+                    //Launch TX
+                    txAt.setStereoVolume(1.0f, 1.0f);
+                    txAt.play();
+                    //Initalise the C++ modem TX side
+                    String frequencySTR = config.getPreferenceS("AFREQUENCY", "1500");
+                    frequency = Integer.parseInt(frequencySTR);
+                    if (frequency < 500) frequency = 500;
+                    if (frequency > 2500) frequency = 2500;
+                    //Save Environment for this thread so it can call back
+                    // Java methods while in C++
+                    Modem.saveEnv();
+                    //Init current modem for Tx
+                    Modem.txInit(frequency);
+                    //Encode character buffer into sound
+                    //Changed for Utf-8 variable length codes
+                    byte[] bytesToSend = null;
                     try {
-                        // TODO: DEBUG
-                        long startTime = System.nanoTime();
-
-                        //Reset the stop flag if it was ON
-                        Modem.stopTX = false;
-                        //Set flags to TXing
-                        Processor.TXActive = true;
-                        //Stop the modem receiving side
-                        pauseRxModem();
-
-                        //Wait for the receiving side to be fully stopped???
-                        Thread.sleep(500);
-
-                        //Open and initialise the sound system
-                        int intSize = 4 * android.media.AudioTrack.getMinBufferSize(8000, AudioFormat.CHANNEL_OUT_MONO, AudioFormat.ENCODING_PCM_16BIT); //Android check the multiplier value for the buffer size
-
-                        txAt = new AudioTrack(AudioManager.STREAM_MUSIC, 8000, AudioFormat.CHANNEL_OUT_MONO, AudioFormat.ENCODING_PCM_16BIT, intSize, AudioTrack.MODE_STREAM);
-                        //Launch TX
-                        txAt.setStereoVolume(1.0f, 1.0f);
-                        txAt.play();
-                        //Initalise the C++ modem TX side
-                        String frequencySTR = config.getPreferenceS("AFREQUENCY", "1500");
-                        frequency = Integer.parseInt(frequencySTR);
-                        if (frequency < 500) frequency = 500;
-                        if (frequency > 2500) frequency = 2500;
-                        //Save Environment for this thread so it can call back
-                        // Java methods while in C++
-                        Modem.saveEnv();
-                        //Init current modem for Tx
-                        Modem.txInit(frequency);
-                        //Encode character buffer into sound
-                        //Changed for Utf-8 variable length codes
-                        byte[] bytesToSend = null;
-                        try {
-                            bytesToSend = txSendline.getBytes("UTF_8");
-                        } catch (Exception e) { //Invalid UTF-8 characters
-                            bytesToSend[0] = 0;//Null character
-                        }
-                        Modem.txCProcess(bytesToSend, bytesToSend.length);
-
-                        //Stop audio track
-                        txAt.stop();
-                        //Wait for end of audio play to avoid
-                        //overlaps between end of TX and start of RX
-                        while (txAt.getPlayState() == AudioTrack.PLAYSTATE_PLAYING) {
-                            try {
-                                Thread.sleep(50);
-                            } catch (InterruptedException e) {
-                                e.printStackTrace();
-                            }
-                        }
-                        //Android debug add a fixed delay to avoid cutting off the tail end of the modulation
-                        Thread.sleep(500);
-                        txAt.release();
-
-                        // TODO: DEBUG
-                        long endTime = System.nanoTime();
-                        long totalTime = (endTime - startTime) / 1000000;
-                        loggingclass.writelog(
-                                "TX duration, ms: " + totalTime
-                                + "; TX, bytes: " + bytesToSend.length
-                                + "; TX rate, bit/s: " + (bytesToSend.length * 8) / (totalTime / 1000),
-                            null);
-                    } catch (Exception e) {
-                        loggingclass.writelog("Can't output sound. Is Sound device busy?", e);
-                    } finally {
-                        Processor.TXActive = false;
-                        //Restart modem reception
-                        unPauseRxModem();
+                        bytesToSend = txSendline.getBytes("UTF_8");
+                    } catch (Exception e) { //Invalid UTF-8 characters
+                        bytesToSend[0] = 0;//Null character
                     }
+                    Modem.txCProcess(bytesToSend, bytesToSend.length);
 
+                    //Stop audio track
+                    txAt.stop();
+                    //Wait for end of audio play to avoid
+                    //overlaps between end of TX and start of RX
+                    while (txAt.getPlayState() == AudioTrack.PLAYSTATE_PLAYING) {
+                        try {
+                            Thread.sleep(50);
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                    //Android debug add a fixed delay to avoid cutting off the tail end of the modulation
+                    Thread.sleep(500);
+                    txAt.release();
+
+                    // TODO: DEBUG
+                    long endTime = System.nanoTime();
+                    long totalTime = (endTime - startTime) / 1000000;
+                    loggingclass.writelog(
+                            "TX duration, ms: " + totalTime
+                                    + "; TX, bytes: " + bytesToSend.length
+                                    + "; TX rate, bit/s: " + (bytesToSend.length * 8) / (totalTime / 1000),
+                            null);
+                } catch (Exception e) {
+                    loggingclass.writelog("Can't output sound. Is Sound device busy?", e);
+                } finally {
+                    ModemService.TXActive = false;
+                    //Restart modem reception
+                    unPauseRxModem();
                 }
 
             }

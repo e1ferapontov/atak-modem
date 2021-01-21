@@ -99,7 +99,7 @@ public class AndFlmsg extends AppCompatActivity {
     public static final Runnable updatecpuload = new Runnable() {
         public void run() {
             if (CpuLoad != null) {
-                CpuLoad.setProgress(Processor.cpuload);
+                CpuLoad.setProgress(ModemService.cpuload);
             }
         }
     };
@@ -112,8 +112,8 @@ public class AndFlmsg extends AppCompatActivity {
         public void run() {
             if (myTermTV != null) {
                 //Update done with setText below
-                TerminalBuffer += Processor.TermWindow;
-                Processor.TermWindow = "";
+                TerminalBuffer += ModemService.TermWindow;
+                ModemService.TermWindow = "";
                 if (TerminalBuffer.length() > 10000) {
                     TerminalBuffer = TerminalBuffer.substring(2000);
                 }
@@ -194,8 +194,7 @@ public class AndFlmsg extends AppCompatActivity {
         }
         //Re-do overall check
         havePassedAllPermissionsTest = allPermissionsOk();
-        if (havePassedAllPermissionsTest &&
-                requestCode == REQUEST_PERMISSIONS) { //Only if requested at OnCreate time
+        if (havePassedAllPermissionsTest && requestCode == REQUEST_PERMISSIONS) { //Only if requested at OnCreate time
             performOnCreate();
             performOnStart();
         } else {
@@ -225,6 +224,8 @@ public class AndFlmsg extends AppCompatActivity {
             }
         }
 
+        // Init config
+        mysp = PreferenceManager.getDefaultSharedPreferences(this);
 
         //Debug only: Menu hack to force showing the overflow button (aka menu button) on the
         //   action bar EVEN IF there is a hardware button
@@ -258,10 +259,6 @@ public class AndFlmsg extends AppCompatActivity {
 
     //Could be executed only when all necessary permissions are allowed
     private void performOnCreate() {
-
-        // Init config
-        mysp = PreferenceManager.getDefaultSharedPreferences(this);
-
         //Set the Activity's Theme
         setTheme(R.style.andFlmsgStandard);
 
@@ -273,8 +270,8 @@ public class AndFlmsg extends AppCompatActivity {
         Modem.getModemsFromC();
 
         //If we do not have a last mode, this is the first time in the app
-        if (Processor.RxModem == -1) {
-            Processor.RxModem = Modem.getModemCodeByName("8PSK1000");
+        if (ModemService.RxModem == -1) {
+            ModemService.RxModem = Modem.DEFAULT_MODEM_CODE;
         }
 
         // We start with the Terminal screen
@@ -311,7 +308,7 @@ public class AndFlmsg extends AppCompatActivity {
             if (ProcessorON) {
                 if (Modem.modemState == Modem.RXMODEMRUNNING) {
                     Modem.stopRxModem();
-                    stopService(new Intent(AndFlmsg.this, Processor.class));
+                    stopService(new Intent(AndFlmsg.this, ModemService.class));
                     ProcessorON = false;
                     // Force garbage collection to prevent Out Of Memory errors
                     // on small RAM devices
@@ -331,9 +328,9 @@ public class AndFlmsg extends AppCompatActivity {
             // RAM devices
             System.gc();
 
-            Processor.RxModem = Processor.TxModem = Processor.RxModem;
+            ModemService.RxModem = ModemService.TxModem = ModemService.RxModem;
 
-            startService(new Intent(AndFlmsg.this, Processor.class));
+            startService(new Intent(AndFlmsg.this, ModemService.class));
             ProcessorON = true;
         } else { // start if not ON yet AND we haven't paused the modem manually
             if (!ProcessorON && !modemPaused) {
@@ -378,28 +375,18 @@ public class AndFlmsg extends AppCompatActivity {
                 // Force garbage collection to prevent Out Of Memory errors on
                 // small RAM devices
                 System.gc();
-                startService(new Intent(AndFlmsg.this, Processor.class));
+                startService(new Intent(AndFlmsg.this, ModemService.class));
                 ProcessorON = true;
             }
         }
     }
 
     @Override
-    public void onPause() {
-        super.onPause();
-    }
-
-    @Override
     public void onResume() {
         super.onResume();
 
-        String str = Modem.getModemNameByCode(Processor.TxModem);
+        String str = Modem.getModemNameByCode(ModemService.TxModem);
         setTitle("Current mode: " + str);
-    }
-
-    @Override
-    public void onDestroy() {
-        super.onDestroy();
     }
 
     // Option Menu
@@ -436,8 +423,7 @@ public class AndFlmsg extends AppCompatActivity {
                         public void onClick(DialogInterface dialog, int id) {
                             // Stop the Modem and Listening Service
                             if (ProcessorON) {
-                                stopService(new Intent(AndFlmsg.this,
-                                        Processor.class));
+                                stopService(new Intent(AndFlmsg.this, ModemService.class));
                                 ProcessorON = false;
                             }
                             // Close that activity and return to previous screen
@@ -520,7 +506,7 @@ public class AndFlmsg extends AppCompatActivity {
                 //Clear the text field
                 view.setText("");
                 savedTextMessage = "";
-                Processor.TX_Text += (intext + "\n");
+                ModemService.TX_Text += (intext + "\n");
                 Modem.txData(intext + "\n");
             }
         });

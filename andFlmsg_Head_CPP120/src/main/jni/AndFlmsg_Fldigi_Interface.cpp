@@ -56,18 +56,6 @@ int audioBufferIndex;
 
 //***************** FROM C++ to JAVA ******************
 
-//Get the value of Java boolean static variable newAmplReady of the Java Modem class
-extern bool getNewAmplReady() {
-		jclass myClass = NULL;
-		myClass = gEnv->FindClass("com/AndFlmsg/Modem");
-		jfieldID myFid = NULL;
-		//Find Java field newAmplReady of type boolean
-		myFid = gEnv->GetStaticFieldID(myClass,"newAmplReady","Z");
-	bool newAmplReady = gEnv->GetStaticBooleanField(myClass, myFid);
-	return newAmplReady;
-return true;
-}
-
 //Access to Java config class methods for accessing String preferences
 extern string getPreferenceS(string preferenceString, string defaultValue) {
 

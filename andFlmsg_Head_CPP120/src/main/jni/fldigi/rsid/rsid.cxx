@@ -372,17 +372,6 @@ if (progdefaults.rsidWideSearch) {
 		else
 			aFFTAmpl[i] = Real * Real + Imag * Imag;
 	}
-	
-	//Waterfall needs a new array of amplitudes?
-	//Copy to Waterfall array only if the previous dataset has been used
-	//Get access to Java boolean static variable newAmplReady of the Java Modem class
-	bool newAmplReady = getNewAmplReady();
-
-	if (!newAmplReady) {
-		if (fftCounter > 1) { //Once every two FFTs since we have a new FFT for every half period
-			fftCounter = 0;
-		} else fftCounter++;
-	}
 
 	//Android Added conditional search (we keep the FFT processing for the waterfall display)
 	if (doSearch) {

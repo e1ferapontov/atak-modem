@@ -18,9 +18,11 @@ package com.AndFlmsg;
 import android.app.Activity;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.preference.EditTextPreference;
 import android.preference.ListPreference;
 import android.preference.Preference;
 import android.preference.PreferenceActivity;
+import android.widget.Toast;
 
 import java.util.Set;
 
@@ -47,8 +49,7 @@ public class myPreferences extends PreferenceActivity {
         lp.setEntryValues(entryValues);
 
         if (lp.getValue() == null) {
-            int defaultModeCode = Modem.getModemCodeByName("8PSK1000");
-            int savedModeCode = config.getPreferenceI("LASTMODEUSED", defaultModeCode);
+            int savedModeCode = config.getPreferenceI("LASTMODEUSED", Modem.DEFAULT_MODEM_CODE);
 
             lp.setValue(String.valueOf(savedModeCode));
         }
@@ -74,6 +75,29 @@ public class myPreferences extends PreferenceActivity {
             }
         });
 
+        // Squelch level input
+        final int minSql = 0;
+        final int maxSql = 100;
+
+        final EditTextPreference editTextPreference = (EditTextPreference) findPreference("SQL");
+
+        editTextPreference.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
+            @Override
+            public boolean onPreferenceChange(Preference preference, Object newValue) {
+                int val = Integer.parseInt(newValue.toString());
+                if ((val > minSql) && (val < maxSql)) {
+
+                    Modem.setSquelch(val);
+                    return true;
+                }
+                else {
+                    // invalid you can show invalid message
+                    Toast.makeText(getApplicationContext(), "SQL value must be more than 0 and less than 100!", Toast.LENGTH_LONG).show();
+                    return false;
+                }
+            }
+        });
+
         // Modem digital modes list
         final ListPreference modemListPreference = (ListPreference) findPreference("mode");
 
@@ -86,7 +110,7 @@ public class myPreferences extends PreferenceActivity {
                 String oldValue = lp.getValue();
 
                 if (newValue != oldValue) {
-                    if (AndFlmsg.ProcessorON && !Processor.TXActive && Modem.modemState == Modem.RXMODEMRUNNING) {
+                    if (AndFlmsg.ProcessorON && !ModemService.TXActive && Modem.modemState == Modem.RXMODEMRUNNING) {
                         Modem.changemode(Integer.parseInt((String) newValue));
 
                         lp.setSummary(Modem.getModemNameByCode(Integer.parseInt((String) newValue)));
