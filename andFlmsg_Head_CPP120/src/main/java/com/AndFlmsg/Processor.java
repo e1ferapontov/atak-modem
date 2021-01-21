@@ -38,10 +38,10 @@ public class Processor extends Service {
     static boolean TXActive = false;
 
     //JD temp FIX: init as first modem in list
-    private static final int savedModeIndex = Modem.getModeIndex(config.getPreferenceI("LASTMODEUSED", Modem.getMode("8PSK1000")));
+    private static final int savedModeIndex = config.getPreferenceI("LASTMODEUSED", Modem.getModemCodeByName("8PSK1000"));
 
-    static int TxModem = Modem.customModeListInt[savedModeIndex];
-    static int RxModem = Modem.customModeListInt[savedModeIndex];
+    static int TxModem = savedModeIndex;
+    static int RxModem = savedModeIndex;
 
     // globals to pass info to gui windows
     static String TXmonitor = "";
@@ -91,7 +91,7 @@ public class Processor extends Service {
         Modem.ModemInit();
 
         //Check that we have a current mode, otherwise take the first one in the list (useful when we have a NIL list of custom modes)
-        Processor.RxModem = Processor.TxModem = Modem.customModeListInt[Modem.getModeIndex(Processor.RxModem)];
+        Processor.RxModem = Processor.TxModem = Processor.RxModem;
 
         //Reset frequency and squelch
         Modem.reset();

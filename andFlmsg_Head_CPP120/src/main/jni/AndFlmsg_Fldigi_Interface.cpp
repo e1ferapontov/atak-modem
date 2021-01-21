@@ -427,7 +427,7 @@ Java_com_AndFlmsg_Modem_createRsidModem(JNIEnv* env, jobject thishere) {
 
 //Returns an array of modem names (uses the RSID list in rsid_def.cxx)
 extern "C" JNIEXPORT jobjectArray
-Java_com_AndFlmsg_Modem_getModemCapListString(JNIEnv* env, jobject thishere)
+Java_com_AndFlmsg_Modem_getmodemListString(JNIEnv* env, jobject thishere)
 {
 	char *modeCapListString[MAXMODES];
 	jobjectArray returnedArray;
@@ -461,7 +461,7 @@ Java_com_AndFlmsg_Modem_getModemCapListString(JNIEnv* env, jobject thishere)
 
 //Returns an array of modem codes (uses the RSID list in rsid_def.cxx)
 extern "C" JNIEXPORT jintArray
-Java_com_AndFlmsg_Modem_getModemCapListInt(JNIEnv* env, jobject thishere)
+Java_com_AndFlmsg_Modem_getmodemListInt(JNIEnv* env, jobject thishere)
 {
 
 	jintArray returnedArray;

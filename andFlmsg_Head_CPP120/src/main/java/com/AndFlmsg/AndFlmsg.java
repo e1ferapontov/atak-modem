@@ -45,22 +45,12 @@ import android.support.v7.app.AppCompatActivity;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.TypedValue;
-import android.view.GestureDetector;
-import android.view.GestureDetector.SimpleOnGestureListener;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewConfiguration;
-import android.view.ViewGroup;
-import android.view.Window;
-import android.view.animation.AlphaAnimation;
-import android.view.animation.Animation;
-import android.view.animation.AnimationSet;
-import android.view.animation.LayoutAnimationController;
-import android.view.animation.TranslateAnimation;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ProgressBar;
@@ -74,79 +64,49 @@ import java.lang.reflect.Field;
 @SuppressLint("SetJavaScriptEnabled")
 public class AndFlmsg extends AppCompatActivity {
 
-    private static boolean havePassedAllPermissionsTest = false;
-
-    public static Window myWindow = null;
-
+    // Need handler for callbacks to the UI thread
+    public static final Handler mHandler = new Handler();
+    private static final boolean modemPaused = false;
     public static boolean RXParamsChanged = false;
-
     public static SharedPreferences mysp = null;
-
-    // Horizontal Fling detection despite scrollview
-    private GestureDetector mGesture;
-    // screen transitions / animations
-    private static final int NORMAL = 0;
-    private static final int LEFT = 1;
-    private static final int RIGHT = 2;
-    private static final int TOP = 3;
-    private static final int BOTTOM = 4;
-
-    // Views values
-    private final static int TERMVIEW = 1;
-    private final static int MODEMVIEWnoWF = 3;
-    public final static int MODEMVIEWwithWF = 4;
-
-    static ProgressBar SignalQuality = null;
-    static ProgressBar CpuLoad = null;
-
-    public static int currentview = 0;
-
-    // Layout Views
-    private static TextView myTermTV;
-    private static ScrollView myTermSC;
-
-    private static String savedTextMessage = "";
-
-    // Generic button variable. Just for callback initialisation
-    private Button myButton;
-
     public static String TerminalBuffer = "";
-
     // Member object for processing of Rx and Tx
     // Can be stopped (i.e no RX) to save battery and allow Android to reclaim
     // resources if not visible to the user
     public static boolean ProcessorON = false;
-    private static final boolean modemPaused = false;
-
     // Notifications
-    //private NotificationManager myNotificationManager;
     public static Notification myNotification = null;
-
-    // Need handler for callbacks to the UI thread
-    public static final Handler mHandler = new Handler();
-
     // Listener for changes in preferences
     public static OnSharedPreferenceChangeListener splistener;
-
+    public static boolean readLogsPermit = false;
+    public static boolean recordAudioPermit = false;
+    public static boolean modifyAudioSettingsPermit = false;
+    public static boolean internetPermit = false;
+    public static boolean broadcastStickyPermit = false;
+    public static boolean readPhoneStatePermit = false;
+    static ProgressBar SignalQuality = null;
     // Runnable for updating the signal quality bar in Modem Window
     public static final Runnable updatesignalquality = new Runnable() {
         public void run() {
-            if ((SignalQuality != null) && ((currentview == MODEMVIEWnoWF) || (currentview == MODEMVIEWwithWF))) {
+            if (SignalQuality != null) {
                 SignalQuality.setProgress((int) Modem.metric);
                 SignalQuality.setSecondaryProgress((int) Modem.squelch);
             }
         }
     };
-
+    static ProgressBar CpuLoad = null;
     // Runnable for updating the CPU load bar in Modem Window
     public static final Runnable updatecpuload = new Runnable() {
         public void run() {
-            if ((CpuLoad != null) && ((currentview == MODEMVIEWnoWF) || (currentview == MODEMVIEWwithWF))) {
+            if (CpuLoad != null) {
                 CpuLoad.setProgress(Processor.cpuload);
             }
         }
     };
-
+    private static boolean havePassedAllPermissionsTest = false;
+    // Layout Views
+    private static TextView myTermTV;
+    private static ScrollView myTermSC;
     // Create runnable for posting to terminal window
     public static final Runnable addtoterminal = new Runnable() {
         public void run() {
@@ -169,23 +129,8 @@ public class AndFlmsg extends AppCompatActivity {
             }
         }
     };
-
-    @Override
-    public void onBackPressed() {
-        Toast.makeText(this, getString(R.string.txt_PleaseUseMenuExit), Toast.LENGTH_SHORT).show();
-    }
-
-
-    public static boolean readLogsPermit = false;
-    public static boolean writeExtStoragePermit = false;
-    public static boolean recordAudioPermit = false;
-    public static boolean modifyAudioSettingsPermit = false;
-    public static boolean internetPermit = false;
-    public static boolean broadcastStickyPermit = false;
-    public static boolean readPhoneStatePermit = false;
-    private final int REQUEST_PERMISSIONS = 15556;
+    private static String savedTextMessage = "";
     public final String[] permissionList = {
-            Manifest.permission.WRITE_EXTERNAL_STORAGE,
             Manifest.permission.RECORD_AUDIO,
             Manifest.permission.MODIFY_AUDIO_SETTINGS,
             Manifest.permission.READ_LOGS,
@@ -193,7 +138,12 @@ public class AndFlmsg extends AppCompatActivity {
             Manifest.permission.INTERNET,
             Manifest.permission.READ_PHONE_STATE
     };
+    private final int REQUEST_PERMISSIONS = 15556;
 
+    @Override
+    public void onBackPressed() {
+        Toast.makeText(this, getString(R.string.txt_PleaseUseMenuExit), Toast.LENGTH_SHORT).show();
+    }
 
     //Request permission from the user
     private void requestAllCriticalPermissions() {
@@ -204,7 +154,6 @@ public class AndFlmsg extends AppCompatActivity {
     private boolean allPermissionsOk() {
         final int granted = PackageManager.PERMISSION_GRANTED;
 
-        writeExtStoragePermit = ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) == granted;
         recordAudioPermit = ContextCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO) == granted;
         modifyAudioSettingsPermit = ContextCompat.checkSelfPermission(this, Manifest.permission.MODIFY_AUDIO_SETTINGS) == granted;
         readLogsPermit = ContextCompat.checkSelfPermission(this, Manifest.permission.READ_LOGS) == granted;
@@ -225,9 +174,6 @@ public class AndFlmsg extends AppCompatActivity {
             switch (permissions[i]) {
                 case Manifest.permission.RECORD_AUDIO:
                     recordAudioPermit = grantResults[i] == granted;
-                    break;
-                case Manifest.permission.WRITE_EXTERNAL_STORAGE:
-                    writeExtStoragePermit = grantResults[i] == granted;
                     break;
                 case Manifest.permission.MODIFY_AUDIO_SETTINGS:
                     modifyAudioSettingsPermit = grantResults[i] == granted;
@@ -295,15 +241,10 @@ public class AndFlmsg extends AppCompatActivity {
         }
 
         //Request all permissions up-front and be done with it.
-        //If the app can't perform properly with what is requested then
-        // abort rather than have a crippled app running
         //Dangerous permissions groups that need to ne asked for:
-        //Contacts: for when creating a new mail if we want to get the email address of a contact. Optional.
-        //Location: for GPS to send position and to get accurage time for scanning servers. Essential.
         //Microphone: to get the audio input for the modems. Essential.
         //Phone: to disconnect the Bluetooth audio if a phone call comes in. Otherwise we
         //   send the phone call over the radio. Not allowed in Amateur radio or only with severe restrictions. Essential.
-        //Storage: to read and write to the SD card. Essential, otherwise why use the app. There is Tivar for Rx only applications.
         //First check if the app already has the permissions
         havePassedAllPermissionsTest = allPermissionsOk();
         if (havePassedAllPermissionsTest) {
@@ -329,11 +270,11 @@ public class AndFlmsg extends AppCompatActivity {
         Modem.rxRsidOn = config.getPreferenceB("RXRSID", false);
 
         //Update the list of available modems
-        Modem.updateModemCapabilityList();
+        Modem.getModemsFromC();
 
         //If we do not have a last mode, this is the first time in the app
         if (Processor.RxModem == -1) {
-            Processor.RxModem = Modem.getMode("8PSK1000");
+            Processor.RxModem = Modem.getModemCodeByName("8PSK1000");
         }
 
         // We start with the Terminal screen
@@ -390,11 +331,7 @@ public class AndFlmsg extends AppCompatActivity {
             // RAM devices
             System.gc();
 
-            // Get current mode index (returns first position if not in list
-            // anymore in case we changed to custom mode list on the current
-            // mode)
-            Processor.RxModem = Processor.TxModem = Modem.
-                    customModeListInt[Modem.getModeIndex(Processor.RxModem)];
+            Processor.RxModem = Processor.TxModem = Processor.RxModem;
 
             startService(new Intent(AndFlmsg.this, Processor.class));
             ProcessorON = true;
@@ -455,17 +392,14 @@ public class AndFlmsg extends AppCompatActivity {
     @Override
     public void onResume() {
         super.onResume();
+
+        String str = Modem.getModemNameByCode(Processor.TxModem);
+        setTitle("Current mode: " + str);
     }
 
     @Override
     public void onDestroy() {
         super.onDestroy();
-    }
-
-
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        Toast.makeText(AndFlmsg.this, "requestCode" + requestCode, Toast.LENGTH_SHORT).show();
     }
 
     // Option Menu
@@ -487,39 +421,37 @@ public class AndFlmsg extends AppCompatActivity {
     // Option Screen handler
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        AlertDialog.Builder myAlertDialog = new AlertDialog.Builder(
-                AndFlmsg.this);
-        switch (item.getItemId()) {
-            case R.id.prefs:
-                Intent OptionsActivity = new Intent(AndFlmsg.this,
-                        myPreferences.class);
-                startActivity(OptionsActivity);
-                break;
-            case R.id.exit:
-                myAlertDialog.setMessage(getString(R.string.txt_AreYouSureExit));
-                myAlertDialog.setCancelable(false);
-                myAlertDialog.setPositiveButton(getString(R.string.txt_Yes),
-                        new DialogInterface.OnClickListener() {
-                            public void onClick(DialogInterface dialog, int id) {
-                                // Stop the Modem and Listening Service
-                                if (ProcessorON) {
-                                    stopService(new Intent(AndFlmsg.this,
-                                            Processor.class));
-                                    ProcessorON = false;
-                                }
-                                // Close that activity and return to previous screen
-                                finish();
-                                // Kill the process
-                                android.os.Process.killProcess(android.os.Process.myPid());
+        int buttonId = item.getItemId();
+
+        if (buttonId == R.id.prefs) {
+            Intent OptionsActivity = new Intent(AndFlmsg.this,
+                    myPreferences.class);
+            startActivity(OptionsActivity);
+        } else if (buttonId == R.id.exit) {
+            AlertDialog.Builder myAlertDialog = new AlertDialog.Builder(AndFlmsg.this);
+            myAlertDialog.setMessage(getString(R.string.txt_AreYouSureExit));
+            myAlertDialog.setCancelable(false);
+            myAlertDialog.setPositiveButton(getString(R.string.txt_Yes),
+                    new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int id) {
+                            // Stop the Modem and Listening Service
+                            if (ProcessorON) {
+                                stopService(new Intent(AndFlmsg.this,
+                                        Processor.class));
+                                ProcessorON = false;
                             }
-                        });
-                myAlertDialog.setNegativeButton(getString(R.string.txt_No), new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int id) {
-                        dialog.cancel();
-                    }
-                });
-                myAlertDialog.show();
-                break;
+                            // Close that activity and return to previous screen
+                            finish();
+                            // Kill the process
+                            android.os.Process.killProcess(android.os.Process.myPid());
+                        }
+                    });
+            myAlertDialog.setNegativeButton(getString(R.string.txt_No), new DialogInterface.OnClickListener() {
+                public void onClick(DialogInterface dialog, int id) {
+                    dialog.cancel();
+                }
+            });
+            myAlertDialog.show();
         }
         return true;
     }
@@ -537,24 +469,11 @@ public class AndFlmsg extends AppCompatActivity {
     // Display the Terminal layout and associate it's buttons
     private void displayTerminal() {
         // Change layout and remember which one we are on
-        currentview = TERMVIEW;
         setContentView(R.layout.terminal);
         myTermTV = findViewById(R.id.terminalview);
         myTermTV.setHorizontallyScrolling(false);
         myTermTV.setTextSize(16);
-        myWindow = getWindow();
 
-        // If blank (on start), display version
-        final String welcomeString = "\n" + this.getString(R.string.txt_WelcomeToAndFlmsg) + " "
-                + Processor.version
-                + this.getString(R.string.txt_WelcomeIntro);
-        if (TerminalBuffer.length() == 0) {
-            TerminalBuffer = welcomeString;
-        } else {
-            if (TerminalBuffer.equals(welcomeString)) {
-                TerminalBuffer = "";
-            }
-        }
         // Reset terminal display in case it was blanked out by a new oncreate
         // call
         myTermTV.setText(TerminalBuffer);
@@ -590,7 +509,8 @@ public class AndFlmsg extends AppCompatActivity {
         SignalQuality = findViewById(R.id.signal_quality);
 
         // JD Initialize the Send Text button (commands in connected mode)
-        myButton = findViewById(R.id.button_sendtext);
+        // Generic button variable. Just for callback initialisation
+        Button myButton = findViewById(R.id.button_sendtext);
         setTextSize(myButton);
         myButton.setOnClickListener(new OnClickListener() {
             public void onClick(View v) {

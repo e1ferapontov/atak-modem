@@ -15,6 +15,7 @@
 
 package com.AndFlmsg;
 
+import android.annotation.SuppressLint;
 import android.content.SharedPreferences;
 import android.media.AudioFormat;
 import android.media.AudioManager;
@@ -23,7 +24,7 @@ import android.media.AudioTrack;
 import android.media.MediaRecorder.AudioSource;
 import android.os.Process;
 
-import java.nio.charset.StandardCharsets;
+import java.util.HashMap;
 
 public class Modem {
 
@@ -45,15 +46,10 @@ public class Modem {
     //Is now also accessed from the c++ native side in rsid.cxx
     public static boolean newAmplReady = false;
     public static boolean stopTX = false;
-    //List of modems and modes returned from the C++ modems
-    public static int[] modemCapListInt = new int[MAXMODES];
-    public static String[] modemCapListString = new String[MAXMODES];
-    public static int numModes = 0;
-    //Custom list of modes as slected in the preferences (can include all modes above if
-    //  "Custom List" is not selected, or alternatively all modes manually selected in preferences)
-    public static int[] customModeListInt = new int[MAXMODES];
-    public static String[] customModeListString = new String[MAXMODES];
-    public static int customNumModes = 0;
+    // Modem modes
+    public static HashMap<Integer, String> modemNamesByCode;
+    public static HashMap<String, Integer> modemCodesByName;
+    public static int modesQty = 0;
     //Tx variables
     public static AudioTrack txAt = null;
     //RSID Flags
@@ -70,6 +66,58 @@ public class Modem {
     static {
         System.loadLibrary("c++_shared");
         System.loadLibrary("AndFlmsg_Modem_Interface");
+    }
+
+    public static void getModemsFromC() {
+        //List of modems and modes returned from the C++ modems
+        int[] modemCodeList = getmodemListInt();
+        String[] modemNamesList = getmodemListString();
+        modesQty = 0;
+
+        modemNamesByCode = new HashMap<>();
+        modemCodesByName = new HashMap<>();
+
+        //Now find the end of modem list to know how many different modems codes we have
+        for (int i = 0; i < MAXMODES; i++) {
+            if (modemCodeList[i] == -1) {
+                modesQty = i;
+                //Exit loop
+                i = MAXMODES;
+            }
+        }
+
+        // Populate hastables
+        for (int i = 0; i < modesQty; i++) {
+            modemNamesByCode.put(modemCodeList[i], modemNamesList[i]);
+            modemCodesByName.put(modemNamesList[i], modemCodeList[i]);
+        }
+
+        //Sort by mode code to re-group modes of the same modem (as they are in two arrays in rsid_def.cxx)
+        int[] sortedModemCodeList = new int[modesQty];
+
+        boolean swapped = true;
+        int tmp;
+        while (swapped) {
+            swapped = false;
+            for (int i = 0; i < modesQty - 1; i++) {
+                if (sortedModemCodeList[i] > sortedModemCodeList[i + 1]) {
+                    tmp = sortedModemCodeList[i];
+                    sortedModemCodeList[i] = sortedModemCodeList[i + 1];
+                    sortedModemCodeList[i + 1] = tmp;
+                    swapped = true;
+                }
+            }
+        }
+    }
+
+    //Returns the modem code given a modem name (String)
+    public static String getModemNameByCode(int modeCode) {
+        return modemNamesByCode.get(modeCode);
+    }
+
+    //Receives a modem code. Returns the modem index in the array of ALL modes supplied by the C++ modem
+    public static int getModemCodeByName(String modeName) {
+        return modemCodesByName.get(modeName);
     }
 
     //Declaration of native classes
@@ -91,9 +139,9 @@ public class Modem {
 
     private native static String createRsidModem();
 
-    private native static int[] getModemCapListInt();
+    private native static int[] getmodemListInt();
 
-    private native static String[] getModemCapListString();
+    private native static String[] getmodemListString();
 
     private native static String txInit(double frequency);
 
@@ -122,48 +170,10 @@ public class Modem {
     }
 
 
-    //Get capability list of modems from all the C++ modems (taken from rsid_defs.cxx)
-    public static void updateModemCapabilityList() {
-        //get modem list (int and string description). The C++ side returns its list of available modems.
-        modemCapListInt = getModemCapListInt();
-        modemCapListString = getModemCapListString();
-        //Now find the end of modem list to know how many different modems codes we have
-        Modem.numModes = MAXMODES; //Just in case
-        for (int i = 0; i < MAXMODES; i++) {
-            if (modemCapListInt[i] == -1) {
-                Modem.numModes = i;
-                //Exit loop
-                i = MAXMODES;
-            }
-        }
-        //Sort by mode code to re-group modes of the same modem (as they are in two arrays in rsid_def.cxx)
-        boolean swapped = true;
-        int tmp;
-        String tmpS;
-        while (swapped) {
-            swapped = false;
-            for (int i = 0; i < numModes - 1; i++) {
-                if (modemCapListInt[i] > modemCapListInt[i + 1]) {
-                    tmp = modemCapListInt[i];
-                    tmpS = modemCapListString[i];
-                    modemCapListInt[i] = modemCapListInt[i + 1];
-                    modemCapListString[i] = modemCapListString[i + 1];
-                    modemCapListInt[i + 1] = tmp;
-                    modemCapListString[i + 1] = tmpS;
-                    swapped = true;
-                }
-            }
-        }
-        customModeListInt = modemCapListInt;
-        customModeListString = modemCapListString;
-        customNumModes = numModes;
-    }
-
-
     //Initialise RX modem
     public static void ModemInit() {
         //(re)get list of available modems
-        updateModemCapabilityList();
+        getModemsFromC();
 
         //Android To-DO: Change to C++ resampler instead of Java quadratic resampler
         //Initialize Re-sampling to 11025Hz for RSID, THOR and MFSK modems
@@ -171,50 +181,14 @@ public class Modem {
         SampleRateConversion.SampleRateConversionInit((float) (11025.0 / 8000.0));
     }
 
-
-    //Returns the modem code given a modem name (String)
-    public static int getMode(String mstring) {
-        int j = 0;
-        for (int i = 0; i < modemCapListInt.length; i++) {
-            if (modemCapListString[i].equals(mstring)) j = i;
-        }
-        return modemCapListInt[j];
-    }
-
-    //Returns the modem index in the array of modes available given a modem code
-    public static int getModeIndex(int mcode) {
-        int j = -1;
-        for (int i = 0; i < customNumModes; i++) {
-            if (mcode == customModeListInt[i]) j = i;
-        }
-        //In case we didn't find it, return the first mode in the list to avoid segment fault
-        if (j == -1) {
-            j = 0;
-        }
-        return j;
-    }
-
-    //Receives a modem code. Returns the modem index in the array of ALL modes supplied by the C++ modem
-    public static int getModeIndexFullList(int mcode) {
-        int j = -1;
-        for (int i = 0; i < numModes; i++) {
-            if (mcode == modemCapListInt[i]) j = i;
-        }
-        //In case we didn't find it, return the first mode in the list to avoid segment fault
-        if (j == -1) {
-            j = 0;
-        }
-        return j;
-    }
-
     //Save last mode used for next app start
+    @SuppressLint("ApplySharedPref")
     private static void saveLastModeUsed(int modemCode) {
         SharedPreferences.Editor editor = AndFlmsg.mysp.edit();
         editor.putString("LASTMODEUSED", Integer.toString(modemCode));
         // Commit the edits!
         editor.commit();
     }
-
 
     private static void soundInInit() {
         bufferSize = (int) sampleRate; // 1 second of Audio max
@@ -393,19 +367,14 @@ public class Modem {
         Processor.restartRxModem.release(1);
     }
 
-    static void changemode(int newMode) {
+    static void changemode(int newModemCode) {
         //Stop the modem receiving side to prevent using the wrong values
         pauseRxModem();
 
-        int newModemMode = customModeListInt[getModeIndex(newMode)];
-
-        loggingclass.writelog("newMode " + newMode, null);
-        loggingclass.writelog("newModemMode " + newModemMode, null);
-        Processor.TxModem = Processor.RxModem = newModemMode;
-        saveLastModeUsed(newModemMode);
+        Processor.TxModem = Processor.RxModem = newModemCode;
+        saveLastModeUsed(newModemCode);
         //Restart modem reception
         unPauseRxModem();
-
     }
 
     static void setFrequency(double rxfreq) {
@@ -568,9 +537,11 @@ public class Modem {
                         // TODO: DEBUG
                         long endTime = System.nanoTime();
                         long totalTime = (endTime - startTime) / 1000000;
-                        loggingclass.writelog("TX duration, ms: " + totalTime, null);
-                        loggingclass.writelog("TX, bytes: " + bytesToSend.length, null);
-                        loggingclass.writelog("TX rate, bit/s: " + (bytesToSend.length * 8) / (totalTime / 1000), null);
+                        loggingclass.writelog(
+                                "TX duration, ms: " + totalTime
+                                + "; TX, bytes: " + bytesToSend.length
+                                + "; TX rate, bit/s: " + (bytesToSend.length * 8) / (totalTime / 1000),
+                            null);
                     } catch (Exception e) {
                         loggingclass.writelog("Can't output sound. Is Sound device busy?", e);
                     } finally {

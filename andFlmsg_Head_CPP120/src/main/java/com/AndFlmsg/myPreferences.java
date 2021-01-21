@@ -1,22 +1,18 @@
 /*
- * Preferences.java  
- *   
- * Copyright (C) 2011 John Douyere (VK2ETA)  
- *   
- * This program is distributed in the hope that it will be useful,  
- * but WITHOUT ANY WARRANTY; without even the implied warranty of  
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the  
- * GNU General Public License for more details.  
- *   
- * You should have received a copy of the GNU General Public License  
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.  
+ * Preferences.java
+ *
+ * Copyright (C) 2011 John Douyere (VK2ETA)
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 package com.AndFlmsg;
-
-/**
- * @author John Douyere <vk2eta@gmail.com>
- */
 
 
 import android.app.Activity;
@@ -26,28 +22,35 @@ import android.preference.ListPreference;
 import android.preference.Preference;
 import android.preference.PreferenceActivity;
 
+import java.util.Set;
+
 
 public class myPreferences extends PreferenceActivity {
 
     protected static void setListPreferenceData(ListPreference lp) {
-        CharSequence[] entries = new CharSequence[Modem.numModes];
-        CharSequence[] entryValues = new CharSequence[Modem.numModes];
+        CharSequence[] entries = new CharSequence[Modem.modesQty];
+        CharSequence[] entryValues = new CharSequence[Modem.modesQty];
 
-        for (int i = 0; i < Modem.numModes; i++) {
-            entryValues[i] = String.valueOf(i);
-            entries[i] = Modem.modemCapListString[i];
+        Set<Integer> keyset = Modem.modemNamesByCode.keySet();
+
+        int i = 0;
+        for (int code : keyset) {
+            String name = Modem.modemNamesByCode.get(code);
+
+            entryValues[i] = String.valueOf(code);
+            entries[i] = name;
+
+            i += 1;
         }
 
         lp.setEntries(entries);
         lp.setEntryValues(entryValues);
 
         if (lp.getValue() == null) {
-            int defaultModeCode = Modem.getMode("8PSK1000");
+            int defaultModeCode = Modem.getModemCodeByName("8PSK1000");
             int savedModeCode = config.getPreferenceI("LASTMODEUSED", defaultModeCode);
 
-            int newModeCode = Modem.getModeIndex(savedModeCode);
-
-            lp.setValue(String.valueOf(newModeCode));
+            lp.setValue(String.valueOf(savedModeCode));
         }
         lp.setSummary(lp.getEntry());
     }
@@ -86,11 +89,9 @@ public class myPreferences extends PreferenceActivity {
                     if (AndFlmsg.ProcessorON && !Processor.TXActive && Modem.modemState == Modem.RXMODEMRUNNING) {
                         Modem.changemode(Integer.parseInt((String) newValue));
 
-                        lp.setSummary(lp.getEntries()[Integer.parseInt((String) newValue)]);
+                        lp.setSummary(Modem.getModemNameByCode(Integer.parseInt((String) newValue)));
 
-
-                        int mIndex = Modem.getModeIndexFullList(Integer.parseInt((String) newValue));
-                        loggingclass.writelog("Current mode: " + Modem.modemCapListString[mIndex], null);
+                        loggingclass.writelog("Mode changed to " + Modem.getModemNameByCode(Integer.parseInt((String) newValue)), null);
 
                         return true;
                     }
