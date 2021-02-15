@@ -19,6 +19,9 @@ import android.app.Service;
 import android.content.Intent;
 import android.os.IBinder;
 
+import com.AtakModem.server.UdpReceiver;
+
+import java.io.IOException;
 import java.util.concurrent.Semaphore;
 
 
@@ -26,6 +29,9 @@ import java.util.concurrent.Semaphore;
  * @author John Douyere (VK2ETA)
  */
 public class ModemService extends Service {
+    public static UdpReceiver chatReceiver = null;
+    public static UdpReceiver saReceiver = null;
+
     //Semaphores to instruct the RxTx Thread to start or stop
     public static Semaphore restartRxModem = new Semaphore(1, false);
     static String version = "Version 1.4.2, 2020-12-01";
@@ -42,8 +48,6 @@ public class ModemService extends Service {
     static String TXmonitor = "";
     static String TermWindow = "";
     static int cpuload;
-    // globals for communication
-    static String TX_Text = "";
 
     static {
         System.loadLibrary("AndFlmsg_Flmsg_Interface");
@@ -61,7 +65,7 @@ public class ModemService extends Service {
         Modem.ModemInit();
 
         //Check that we have a current mode, otherwise take the first one in the list (useful when we have a NIL list of custom modes)
-        ModemService.RxModem = ModemService.TxModem = ModemService.RxModem;
+        ModemService.TxModem = ModemService.RxModem;
 
         //Reset frequency and squelch
         Modem.reset();
@@ -75,6 +79,16 @@ public class ModemService extends Service {
     public int onStartCommand(Intent intent, int flags, int startId) {
         // Start the RxThread
         Modem.startmodem();
+
+        try {
+            chatReceiver = new UdpReceiver(this, UdpReceiver.CHAT_ADDR, UdpReceiver.CHAT_PORT);
+            saReceiver = new UdpReceiver(this, UdpReceiver.SA_ADDR, UdpReceiver.SA_PORT);
+
+            chatReceiver.start();
+            saReceiver.start();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
 
         //Make sure Android keeps this running even if resources are limited
         //Display the notification in the system bar at the top at the same time
@@ -91,6 +105,12 @@ public class ModemService extends Service {
     public void onDestroy() {
         // Kill the Rx Modem thread
         Modem.stopRxModem();
+        try {
+            chatReceiver.stopServer();
+            saReceiver.stopServer();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     @Override

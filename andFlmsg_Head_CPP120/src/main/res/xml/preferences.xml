@@ -14,7 +14,6 @@
         <EditTextPreference
             android:dialogTitle="Set the squelch level (MIN 0, MAX 100): "
             android:inputType="number"
-            android:summary="doesn't work yet"
 
             android:defaultValue="20"
             android:key="SQL"

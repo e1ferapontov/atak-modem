@@ -23,11 +23,13 @@ import android.media.AudioRecord;
 import android.media.AudioTrack;
 import android.media.MediaRecorder.AudioSource;
 import android.os.Process;
+import android.util.Log;
 
 import java.util.HashMap;
 
 public class Modem {
     public static final int DEFAULT_MODEM_CODE = 90; // 8PSK1000
+    public static final float DEFAULT_SQL_LEVEL = (float) 20.0;
 
     public static final int RXMODEMIDLE = 0;
     public static final int RXMODEMSTARTING = 1;
@@ -52,7 +54,7 @@ public class Modem {
     //RSID Flags
     public static boolean rxRsidOn;
     public static boolean txRsidOn;
-    static double squelch = 20.0;
+    static double squelch = DEFAULT_SQL_LEVEL;
     static double metric = 50; //midrange
     private static AudioRecord audiorecorder = null;
     private static boolean RxON = false;
@@ -257,7 +259,7 @@ public class Modem {
                     // Java methods while in C++
                     Modem.saveEnv();
 
-                    String modemReturnedString;
+                    String modemReturnedString = null;
                     modemState = RXMODEMSTARTING;
                     double startproctime = 0;
                     double endproctime = 0;
@@ -286,11 +288,16 @@ public class Modem {
                     //Changed to getPreferencesI in case it is not an interger representation
                     double centerfreq = config.getPreferenceI("AFREQUENCY", 1500);
                     //Limit it's values too
-                    if (centerfreq > 2500) centerfreq = 2500;
-                    if (centerfreq < 500) centerfreq = 500;
-                    String modemInitResult = initCModem(centerfreq);
+                    if (centerfreq > 2500) {
+                        centerfreq = 2500;
+                    }
+                    if (centerfreq < 500) {
+                        centerfreq = 500;
+                    }
+                    initCModem(centerfreq);
                     //Prepare RSID Modem
                     createRsidModem();
+
                     while (RxON) {
                         endproctime = System.currentTimeMillis();
                         double buffertime = (double) numSamples8K / 8000.0 * 1000.0; //in milliseconds
@@ -326,6 +333,7 @@ public class Modem {
                             //Post to TermWindow (Modem) window after each buffer processing
                             //Add TX frame too if present
                             if (Modem.MonitorString.length() > 0 || ModemService.TXmonitor.length() > 0) {
+                                Log.d("TEST ME", "" + modemReturnedString);
                                 ModemService.TermWindow += Modem.MonitorString + ModemService.TXmonitor;
                                 ModemService.TXmonitor = "";
                                 Modem.MonitorString = "";
@@ -333,6 +341,7 @@ public class Modem {
                             }
                         }
                     }
+
                     if (audiorecorder != null) {
                         //Avoid some crashes on wrong state
                         if (audiorecorder.getState() == AudioRecord.STATE_INITIALIZED) {
@@ -342,6 +351,7 @@ public class Modem {
                             audiorecorder.release();
                         }
                     }
+
                     modemState = RXMODEMPAUSED;
                     //Marker for end of thread (Stop modem thread flag)
                     if (!modemThreadOn) {
@@ -391,7 +401,7 @@ public class Modem {
         frequency = Integer.parseInt(frequencySTR);
         if (frequency < 500) frequency = 500;
         if (frequency > 2500) frequency = 2500;
-        squelch = AndFlmsg.mysp.getFloat("SQUELCHVALUE", (float) 20.0);
+        squelch = AndFlmsg.mysp.getFloat("SQUELCHVALUE", DEFAULT_SQL_LEVEL);
     }
 
     @SuppressLint("ApplySharedPref")
@@ -528,7 +538,7 @@ public class Modem {
                     //overlaps between end of TX and start of RX
                     while (txAt.getPlayState() == AudioTrack.PLAYSTATE_PLAYING) {
                         try {
-                            Thread.sleep(50);
+                            Thread.sleep(500);
                         } catch (InterruptedException e) {
                             e.printStackTrace();
                         }

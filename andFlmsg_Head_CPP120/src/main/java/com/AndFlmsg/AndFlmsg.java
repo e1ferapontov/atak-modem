@@ -42,17 +42,11 @@ import android.support.v4.app.NotificationCompat;
 import android.support.v4.app.TaskStackBuilder;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
-import android.text.Editable;
-import android.text.TextWatcher;
-import android.util.TypedValue;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.View.OnClickListener;
 import android.view.ViewConfiguration;
-import android.widget.Button;
-import android.widget.EditText;
 import android.widget.ProgressBar;
 import android.widget.ScrollView;
 import android.widget.TextView;
@@ -129,7 +123,6 @@ public class AndFlmsg extends AppCompatActivity {
             }
         }
     };
-    private static String savedTextMessage = "";
     public final String[] permissionList = {
             Manifest.permission.RECORD_AUDIO,
             Manifest.permission.MODIFY_AUDIO_SETTINGS,
@@ -442,16 +435,6 @@ public class AndFlmsg extends AppCompatActivity {
         return true;
     }
 
-
-    //Set the button text size based on user's preferences
-    private void setTextSize(Button thisButton) {
-        int textSize = config.getPreferenceI("BUTTONTEXTSIZE", 12);
-        if (textSize < 7) textSize = 7;
-        if (textSize > 20) textSize = 20;
-        thisButton.setTextSize(TypedValue.COMPLEX_UNIT_SP, textSize);
-    }
-
-
     // Display the Terminal layout and associate it's buttons
     private void displayTerminal() {
         // Change layout and remember which one we are on
@@ -467,48 +450,10 @@ public class AndFlmsg extends AppCompatActivity {
         // update with whatever we have already accumulated then scroll
         AndFlmsg.mHandler.post(AndFlmsg.addtoterminal);
 
-        //Restore the data entry field at the bottom
-        EditText myView = findViewById(R.id.edit_text_out);
-        myView.setText(savedTextMessage);
-        myView.setSelection(myView.getText().length());
-        //Add a textwatcher to save the text as it is being typed
-        myView.addTextChangedListener(new TextWatcher() {
-
-            public void afterTextChanged(Editable arg0) {
-            }
-
-            public void beforeTextChanged(CharSequence arg0, int arg1,
-                                          int arg2, int arg3) {
-            }
-
-            public void onTextChanged(CharSequence arg0, int arg1, int arg2,
-                                      int arg3) {
-                savedTextMessage = arg0.toString();
-            }
-
-        });
-
         // initialise CPU load bar display
         CpuLoad = findViewById(R.id.cpu_load);
 
         // initialise squelch and signal quality dislay
         SignalQuality = findViewById(R.id.signal_quality);
-
-        // JD Initialize the Send Text button (commands in connected mode)
-        // Generic button variable. Just for callback initialisation
-        Button myButton = findViewById(R.id.button_sendtext);
-        setTextSize(myButton);
-        myButton.setOnClickListener(new OnClickListener() {
-            public void onClick(View v) {
-                // Send a message using content of the edit text widget
-                TextView view = findViewById(R.id.edit_text_out);
-                String intext = view.getText().toString();
-                //Clear the text field
-                view.setText("");
-                savedTextMessage = "";
-                ModemService.TX_Text += (intext + "\n");
-                Modem.txData(intext + "\n");
-            }
-        });
     }
 }

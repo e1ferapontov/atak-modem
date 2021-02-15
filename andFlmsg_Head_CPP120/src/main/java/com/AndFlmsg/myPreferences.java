@@ -26,6 +26,9 @@ import android.widget.Toast;
 
 import java.util.Set;
 
+import static com.AndFlmsg.AndFlmsg.mysp;
+import static com.AndFlmsg.Modem.DEFAULT_SQL_LEVEL;
+
 
 public class myPreferences extends PreferenceActivity {
 
@@ -80,19 +83,28 @@ public class myPreferences extends PreferenceActivity {
         final int maxSql = 100;
 
         final EditTextPreference editTextPreference = (EditTextPreference) findPreference("SQL");
+        float etpInitialValue = AndFlmsg.mysp.getFloat("SQUELCHVALUE", DEFAULT_SQL_LEVEL);
+        editTextPreference.setText(String.valueOf(etpInitialValue));
+        editTextPreference.setSummary(editTextPreference.getText());
 
         editTextPreference.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
             @Override
             public boolean onPreferenceChange(Preference preference, Object newValue) {
-                int val = Integer.parseInt(newValue.toString());
+                EditTextPreference etp = (EditTextPreference) preference;
+
+                float val = Float.parseFloat(newValue.toString());
                 if ((val > minSql) && (val < maxSql)) {
 
                     Modem.setSquelch(val);
+                    etp.setSummary(newValue.toString());
+
+                    loggingclass.writelog("SQL set to " + newValue.toString(), null);
+
                     return true;
                 }
                 else {
                     // invalid you can show invalid message
-                    Toast.makeText(getApplicationContext(), "SQL value must be more than 0 and less than 100!", Toast.LENGTH_LONG).show();
+                    Toast.makeText(getApplicationContext(), "SQL value must be more than 0 and less than 100! Changes weren't saved!", Toast.LENGTH_LONG).show();
                     return false;
                 }
             }
@@ -154,7 +166,7 @@ public class myPreferences extends PreferenceActivity {
             }
         };
 
-        AndFlmsg.mysp.registerOnSharedPreferenceChangeListener(AndFlmsg.splistener);
+        mysp.registerOnSharedPreferenceChangeListener(AndFlmsg.splistener);
 
     }
 
